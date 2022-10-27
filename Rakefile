@@ -58,6 +58,7 @@ CLEAN << 'rubocop-report.json'
 require 'yard'
 YARD::Rake::YardocTask.new do |t|
   t.files = %w[lib/**/*.rb examples/**/*]
+  t.stats_options = ['--list-undoc']
 end
 
 CLEAN << '.yardoc'

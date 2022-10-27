@@ -2,4 +2,4 @@
 --hide-void-return
 --markup-provider=redcarpet
 --markup markdown
-- LICENSE.md
+- LICENSE.txt
