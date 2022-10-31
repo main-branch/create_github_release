@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'create_github_release'
+
+options = CreateGithubRelease::CommandLineParser.new.parse(ARGV)
+CreateGithubRelease::ReleaseAssertions.new(options).make_assertions
+puts unless options.quiet
+# CreateGithubRelease::ReleaseCreator.new(options).create_release
+
+puts <<~MESSAGE unless options.quiet
+  Release '#{options.tag}' created successfully
+  See the release notes at #{options.release_url}
+
+  Next steps:
+  * Get someone to review and approve the release pull request
+  * Merge the pull request manually from the command line with the following commands:
+
+  git checkout #{options.default_branch}
+  git merge --ff-only #{options.branch}
+  git push
+MESSAGE

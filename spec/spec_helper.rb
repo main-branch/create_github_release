@@ -33,6 +33,49 @@ end
 
 SimpleCov.start
 
+# Helper class and method for mocking backtick calls
+
+class MockedCommand
+  def initialize(command, stdout: '', stderr: '', exitstatus: 0)
+    @command = command
+    @stdout = stdout
+    @stderr = stderr
+    @exitstatus = exitstatus
+  end
+
+  attr_reader :command, :stdout, :stderr, :exitstatus
+end
+
+def execute_mocked_command(mocked_commands, command)
+  mocked_command = mocked_commands.find { |c| c.command.match(command) }
+  raise "Command '#{command}' was not mocked" unless mocked_command
+
+  `exit #{mocked_command.exitstatus}`
+  mocked_command.stdout
+end
+
+# Captures stdout and stderr output from a block of code
+#
+# @example
+#   stdout, stderr = capture_output { puts 'hello'; warn 'world' }
+#   stdout # => "hello\n"
+#   stderr # => "world\n"
+#
+# @example Used to test an assertion
+#   subject { @stdout, @stderr = capture_output { assertion.assert } }
+#
+# @return [Array<String, String>] stdout and stderr output
+#
+def capture_output(&block)
+  $stdout = StringIO.new
+  $stderr = StringIO.new
+  block.call
+  [$stdout.string, $stderr.string]
+ensure
+  $stdout = STDOUT
+  $stderr = STDERR
+end
+
 # Make sure to require your project AFTER SimpleCov.start
 #
 require 'create_github_release'
