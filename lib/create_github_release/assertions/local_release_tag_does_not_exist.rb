@@ -5,20 +5,18 @@ require 'create_github_release/assertion_base'
 
 module CreateGithubRelease
   module Assertions
-    # Assert that the 'gh' command is in the path
-    #
-    # Checks both the local repository and the remote repository.
+    # Assert that the release tag does not exist in the local repository
     #
     # @api public
     #
-    class GhCommandExists < AssertionBase
-      # Make sure that the 'gh' command is in the path
+    class LocalReleaseTagDoesNotExist < AssertionBase
+      # Assert that the release tag does not exist in the local repository
       #
       # @example
       #   require 'create_github_release'
       #
       #   options = CreateGithubRelease::Options.new { |o| o.release_type = 'major' }
-      #   assertion = CreateGithubRelease::Assertions::GhCommandExists.new(options)
+      #   assertion = CreateGithubRelease::Assertions::LocalReleaseTagDoesNotExist.new(options)
       #   begin
       #     assertion.assert
       #     puts 'Assertion passed'
@@ -31,12 +29,15 @@ module CreateGithubRelease
       # @raise [SystemExit] if the assertion fails
       #
       def assert
-        print 'Checking that the gh command exists...'
-        `which gh > /dev/null 2>&1`
-        if $CHILD_STATUS.success?
+        print "Checking that local tag '#{options.tag}' does not exist..."
+
+        tags = `git tag --list "#{options.tag}"`.chomp
+        error 'Could not list tags' unless $CHILD_STATUS.success?
+
+        if tags.split.empty?
           puts 'OK'
         else
-          error 'The gh command was not found'
+          error "Local tag '#{options.tag}' already exists"
         end
       end
     end

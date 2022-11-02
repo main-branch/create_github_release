@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe CreateGithubRelease::Assertions::ReleaseTagDoesNotExist do
+RSpec.describe CreateGithubRelease::Assertions::RemoteReleaseTagDoesNotExist do
   let(:assertion) { described_class.new(options) }
   let(:options) do
     CreateGithubRelease::Options.new do |o|
@@ -24,11 +24,10 @@ RSpec.describe CreateGithubRelease::Assertions::ReleaseTagDoesNotExist do
 
     let(:git_command) { 'git branch --show-current' }
 
-    context 'when NEITHER local NOR remote release tags exist' do
+    context 'when the remote release tag does not exist' do
       let(:mocked_commands) do
         [
-          MockedCommand.new('git tag --list "v1.0.0"'),
-          MockedCommand.new("git ls-remote --tags --exit-code 'origin' v1.0.0 >/dev/null 2>&1", exitstatus: 1)
+          MockedCommand.new("git ls-remote --tags --exit-code 'origin' v1.0.0 >/dev/null 2>&1", exitstatus: 2)
         ]
       end
 
@@ -37,23 +36,9 @@ RSpec.describe CreateGithubRelease::Assertions::ReleaseTagDoesNotExist do
       end
     end
 
-    context 'when the local release tag exists' do
-      let(:mocked_commands) do
-        [
-          MockedCommand.new('git tag --list "v1.0.0"', stdout: "v1.0.0\n"),
-          MockedCommand.new("git ls-remote --tags --exit-code 'origin' v1.0.0 >/dev/null 2>&1", exitstatus: 1)
-        ]
-      end
-
-      it 'should fail' do
-        expect { subject }.to raise_error(SystemExit)
-      end
-    end
-
     context 'when the remote release tag exists' do
       let(:mocked_commands) do
         [
-          MockedCommand.new('git tag --list "v1.0.0"'),
           MockedCommand.new("git ls-remote --tags --exit-code 'origin' v1.0.0 >/dev/null 2>&1", exitstatus: 0)
         ]
       end
@@ -63,23 +48,9 @@ RSpec.describe CreateGithubRelease::Assertions::ReleaseTagDoesNotExist do
       end
     end
 
-    context 'when the local AND remote release tags exist' do
+    context 'when the git command fails' do
       let(:mocked_commands) do
         [
-          MockedCommand.new('git tag --list "v1.0.0"', stdout: "v1.0.0\n"),
-          MockedCommand.new("git ls-remote --tags --exit-code 'origin' v1.0.0 >/dev/null 2>&1", exitstatus: 0)
-        ]
-      end
-
-      it 'should fail' do
-        expect { subject }.to raise_error(SystemExit)
-      end
-    end
-
-    context 'when the git command for the local release tag fails' do
-      let(:mocked_commands) do
-        [
-          MockedCommand.new('git tag --list "v1.0.0"', exitstatus: 1),
           MockedCommand.new("git ls-remote --tags --exit-code 'origin' v1.0.0 >/dev/null 2>&1", exitstatus: 1)
         ]
       end

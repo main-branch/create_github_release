@@ -2,6 +2,7 @@
 
 require 'English'
 require 'fileutils'
+require 'create_github_release/assertion_base'
 
 module CreateGithubRelease
   module Assertions

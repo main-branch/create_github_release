@@ -5,20 +5,18 @@ require 'create_github_release/assertion_base'
 
 module CreateGithubRelease
   module Assertions
-    # Assert that the 'gh' command is in the path
-    #
-    # Checks both the local repository and the remote repository.
+    # Assert that the release branch does not exist in the remote repository
     #
     # @api public
     #
-    class GhCommandExists < AssertionBase
-      # Make sure that the 'gh' command is in the path
+    class RemoteReleaseBranchDoesNotExist < AssertionBase
+      # Assert that the release branch does not exist in the remote repository
       #
       # @example
       #   require 'create_github_release'
       #
       #   options = CreateGithubRelease::Options.new { |o| o.release_type = 'major' }
-      #   assertion = CreateGithubRelease::Assertions::GhCommandExists.new(options)
+      #   assertion = CreateGithubRelease::Assertions::RemoteReleaseBranchDoesNotExist.new(options)
       #   begin
       #     assertion.assert
       #     puts 'Assertion passed'
@@ -31,12 +29,13 @@ module CreateGithubRelease
       # @raise [SystemExit] if the assertion fails
       #
       def assert
-        print 'Checking that the gh command exists...'
-        `which gh > /dev/null 2>&1`
-        if $CHILD_STATUS.success?
+        print "Checking that the remote branch '#{options.branch}' does not exist..."
+        `git ls-remote --heads --exit-code '#{options.remote}' '#{options.branch}' >/dev/null 2>&1`
+        if $CHILD_STATUS.exitstatus == 2
           puts 'OK'
         else
-          error 'The gh command was not found'
+          error 'Could not list branches' unless $CHILD_STATUS.success?
+          error "'#{options.branch}' already exists"
         end
       end
     end

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'English'
+require 'create_github_release/assertion_base'
 
 module CreateGithubRelease
   module Assertions

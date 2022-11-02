@@ -2,6 +2,7 @@
 
 require 'English'
 require 'tmpdir'
+require 'create_github_release/assertion_base'
 
 module CreateGithubRelease
   module Assertions
