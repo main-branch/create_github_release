@@ -41,6 +41,7 @@ module CreateGithubRelease
     end
 
     ASSERTIONS = [
+      CreateGithubRelease::Assertions::GitCommandExists,
       CreateGithubRelease::Assertions::BundleIsUpToDate,
       CreateGithubRelease::Assertions::InGitRepo,
       CreateGithubRelease::Assertions::InRepoRootDirectory,
