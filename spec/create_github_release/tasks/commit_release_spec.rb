@@ -33,7 +33,7 @@ RSpec.describe CreateGithubRelease::Tasks::CommitRelease do
       let(:git_exitstatus) { 1 }
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: Could not make release commit/)
+        expect(stderr).to start_with('ERROR: Could not make release commit')
       end
     end
   end

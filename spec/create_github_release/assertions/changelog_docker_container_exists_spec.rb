@@ -37,7 +37,7 @@ RSpec.describe CreateGithubRelease::Assertions::ChangelogDockerContainerExists d
       let(:exitstatus) { 1 }
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: Failed to build the changelog-rs docker container/)
+        expect(stderr).to start_with('ERROR: Failed to build the changelog-rs docker container')
       end
     end
   end

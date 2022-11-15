@@ -33,7 +33,7 @@ RSpec.describe CreateGithubRelease::Tasks::CreateReleaseBranch do
       let(:git_exitstatus) { 1 }
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: Could not create branch 'release-v1.0.0'/)
+        expect(stderr).to start_with("ERROR: Could not create branch 'release-v1.0.0'")
       end
     end
   end

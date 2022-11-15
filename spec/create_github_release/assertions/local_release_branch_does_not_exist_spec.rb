@@ -48,7 +48,7 @@ RSpec.describe CreateGithubRelease::Assertions::LocalReleaseBranchDoesNotExist d
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: 'current-branch' already exists/)
+        expect(stderr).to start_with("ERROR: 'current-branch' already exists")
       end
     end
 
@@ -61,7 +61,7 @@ RSpec.describe CreateGithubRelease::Assertions::LocalReleaseBranchDoesNotExist d
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: Could not list branches/)
+        expect(stderr).to start_with('ERROR: Could not list branches')
       end
     end
   end

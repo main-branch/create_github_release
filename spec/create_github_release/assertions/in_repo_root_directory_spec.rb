@@ -35,7 +35,7 @@ RSpec.describe CreateGithubRelease::Assertions::InRepoRootDirectory do
       let(:mocked_commands) { [MockedCommand.new('git rev-parse --show-toplevel', stdout: "/other/directory\n")] }
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: You are not in the repo's root directory/)
+        expect(stderr).to start_with('ERROR: You are not in the repo\'s root directory')
       end
     end
 
@@ -43,7 +43,7 @@ RSpec.describe CreateGithubRelease::Assertions::InRepoRootDirectory do
       let(:mocked_commands) { [MockedCommand.new('git rev-parse --show-toplevel', exitstatus: 1)] }
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: git rev-parse failed: 1/)
+        expect(stderr).to start_with('ERROR: git rev-parse failed: 1')
       end
     end
   end

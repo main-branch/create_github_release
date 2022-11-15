@@ -34,7 +34,7 @@ RSpec.describe CreateGithubRelease::Assertions::NoStagedChanges do
       let(:mocked_commands) { [MockedCommand.new(git_command, stdout: "99\n")] }
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: There are staged changes/)
+        expect(stderr).to start_with('ERROR: There are staged changes')
       end
     end
 
@@ -42,7 +42,7 @@ RSpec.describe CreateGithubRelease::Assertions::NoStagedChanges do
       let(:mocked_commands) { [MockedCommand.new(git_command, exitstatus: 1)] }
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: git diff command failed: 1/)
+        expect(stderr).to start_with('ERROR: git diff command failed: 1')
       end
     end
   end

@@ -76,7 +76,7 @@ RSpec.describe CreateGithubRelease::Tasks::CreateReleasePullRequest do
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: Could not generate the changelog/)
+        expect(stderr).to start_with('ERROR: Could not generate the changelog')
       end
     end
 
@@ -89,7 +89,7 @@ RSpec.describe CreateGithubRelease::Tasks::CreateReleasePullRequest do
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: Could not create a temporary file/)
+        expect(stderr).to start_with('ERROR: Could not create a temporary file')
       end
     end
 
@@ -104,7 +104,7 @@ RSpec.describe CreateGithubRelease::Tasks::CreateReleasePullRequest do
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: Could not create release pull request/)
+        expect(stderr).to start_with('ERROR: Could not create release pull request')
       end
     end
   end

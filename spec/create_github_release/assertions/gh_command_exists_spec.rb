@@ -37,7 +37,7 @@ RSpec.describe CreateGithubRelease::Assertions::GhCommandExists do
       let(:exitstatus) { 1 }
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: The gh command was not found/)
+        expect(stderr).to start_with('ERROR: The gh command was not found')
       end
     end
   end

@@ -39,7 +39,7 @@ RSpec.describe CreateGithubRelease::Assertions::OnDefaultBranch do
       let(:mocked_commands) { [MockedCommand.new(git_command, stdout: "other-branch\n")] }
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: You are not on the default branch 'default-branch'/)
+        expect(stderr).to start_with("ERROR: You are not on the default branch 'default-branch'")
       end
     end
 
@@ -47,7 +47,7 @@ RSpec.describe CreateGithubRelease::Assertions::OnDefaultBranch do
       let(:mocked_commands) { [MockedCommand.new(git_command, exitstatus: 1)] }
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: You are not on the default branch 'default-branch'/)
+        expect(stderr).to start_with("ERROR: You are not on the default branch 'default-branch'")
       end
     end
   end
