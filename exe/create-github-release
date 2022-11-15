@@ -6,7 +6,7 @@ require 'create_github_release'
 options = CreateGithubRelease::CommandLineParser.new.parse(ARGV)
 CreateGithubRelease::ReleaseAssertions.new(options).make_assertions
 puts unless options.quiet
-# CreateGithubRelease::ReleaseCreator.new(options).create_release
+CreateGithubRelease::ReleaseCreator.new(options).create_release
 
 puts <<~MESSAGE unless options.quiet
   Release '#{options.tag}' created successfully
