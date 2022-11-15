@@ -4,6 +4,8 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateVersion do
   let(:task) { described_class.new(options) }
   let(:options) { CreateGithubRelease::Options.new { |o| o.release_type = 'major' } }
 
+  let(:version_file) { 'lib/my_gem/version.rb' }
+
   before do
     allow(task).to receive(:`).with(String) { |command| execute_mocked_command(mocked_commands, command) }
   end
@@ -18,11 +20,12 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateVersion do
 
     before do
       allow(Bump::Bump).to receive(:run).with('major', commit: false).and_return(['next.version', bump_result])
+      allow(Bump::Bump).to receive(:file).with(no_args).and_return(version_file)
     end
 
     let(:mocked_commands) do
       [
-        MockedCommand.new('git add lib/git/version.rb', exitstatus: git_exitstatus)
+        MockedCommand.new("git add \"#{version_file}\"", exitstatus: git_exitstatus)
       ]
     end
 
@@ -47,7 +50,7 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateVersion do
       let(:git_exitstatus) { 1 }
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to start_with('ERROR: Could not stage changes to lib/git/version.rb')
+        expect(stderr).to start_with("ERROR: Could not stage changes to #{version_file}")
       end
     end
   end

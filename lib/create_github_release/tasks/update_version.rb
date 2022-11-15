@@ -30,13 +30,15 @@ module CreateGithubRelease
       #
       def run
         print 'Updating version...'
-        _next_version, result = Bump::Bump.run(options.release_type, commit: false)
-        error 'Could not bump version' unless result.zero?
-        `git add lib/git/version.rb`
+        message, result = Bump::Bump.run(options.release_type, commit: false)
+        error "Could not bump version: #{message}" unless result.zero?
+
+        version_file = Bump::Bump.file
+        `git add "#{version_file}"`
         if $CHILD_STATUS.success?
           puts 'OK'
         else
-          error 'Could not stage changes to lib/git/version.rb'
+          error "Could not stage changes to #{version_file}"
         end
       end
     end
