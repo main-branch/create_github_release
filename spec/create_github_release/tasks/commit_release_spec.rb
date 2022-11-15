@@ -9,7 +9,10 @@ RSpec.describe CreateGithubRelease::Tasks::CommitRelease do
   end
 
   describe '#run' do
-    subject { @stdout, @stderr = capture_output { task.run } }
+    subject do
+      @stdout, @stderr, exception = capture_output { task.run }
+      raise exception if exception
+    end
     let(:stdout) { @stdout }
     let(:stderr) { @stderr }
 
@@ -30,6 +33,7 @@ RSpec.describe CreateGithubRelease::Tasks::CommitRelease do
       let(:git_exitstatus) { 1 }
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
+        expect(stderr).to match(/^ERROR: Could not make release commit/)
       end
     end
   end

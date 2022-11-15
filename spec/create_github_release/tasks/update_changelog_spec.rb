@@ -14,14 +14,19 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateChangelog do
   end
 
   describe '#run' do
-    subject { @stdout, @stderr = capture_output { task.run } }
+    subject do
+      @stdout, @stderr, exception = capture_output { task.run }
+      raise exception if exception
+    end
     let(:stdout) { @stdout }
     let(:stderr) { @stderr }
 
     before do
       allow(File).to receive(:read).and_call_original
       allow(File).to receive(:write) do |path, content|
-        raise RuntimeError, "Unexpected file write to #{path} with #{content}"
+        # :nocov:
+        raise "Unexpected file write to #{path} with #{content}"
+        # :nocov:
       end
       allow(FileUtils).to receive(:pwd).and_return('/my_worktree')
     end
@@ -76,7 +81,11 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateChangelog do
     context 'when a changelog file and new release exists' do
       before do
         expect(File).to receive(:read).with('CHANGELOG.md').and_return(existing_changelog)
-        expect(File).to receive(:write).with('CHANGELOG.md', expected_new_changelog) { }
+        expect(File).to(
+          receive(:write)
+            .with('CHANGELOG.md', expected_new_changelog)
+            .and_return(expected_new_changelog.size)
+        )
       end
 
       it 'should succeed' do
@@ -87,7 +96,11 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateChangelog do
     context 'when a changelog file does not exist' do
       before do
         expect(File).to receive(:read).with('CHANGELOG.md').and_raise(Errno::ENOENT)
-        expect(File).to receive(:write).with('CHANGELOG.md', expected_new_changelog) { }
+        expect(File).to(
+          receive(:write)
+            .with('CHANGELOG.md', expected_new_changelog)
+            .and_return(expected_new_changelog.size)
+        )
       end
 
       let(:expected_new_changelog) { <<~CHANGELOG }
@@ -106,6 +119,7 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateChangelog do
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
+        expect(stderr).to match(/^ERROR: Could not stage changes to CHANGELOG.md/)
       end
     end
 
@@ -114,6 +128,7 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateChangelog do
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
+        expect(stderr).to match(/^ERROR: Could not generate the release notes/)
       end
     end
 
@@ -125,19 +140,25 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateChangelog do
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
+        expect(stderr).to match(/^ERROR: Could not write to CHANGELOG.md: Permission denied/)
       end
     end
 
     context 'when the changelog file could not be staged' do
       before do
         expect(File).to receive(:read).with('CHANGELOG.md').and_return(existing_changelog)
-        expect(File).to receive(:write).with('CHANGELOG.md', expected_new_changelog)
+        expect(File).to(
+          receive(:write)
+            .with('CHANGELOG.md', expected_new_changelog)
+            .and_return(expected_new_changelog.size)
+        )
       end
 
       let(:git_add_exitstatus) { 1 }
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
+        expect(stderr).to match(/^ERROR: Could not stage changes to CHANGELOG.md/)
       end
     end
   end

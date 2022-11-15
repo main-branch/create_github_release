@@ -9,7 +9,10 @@ RSpec.describe CreateGithubRelease::Tasks::CreateGithubRelease do
   end
 
   describe '#run' do
-    subject { @stdout, @stderr = capture_output { task.run } }
+    subject do
+      @stdout, @stderr, exception = capture_output { task.run }
+      raise exception if exception
+    end
     let(:stdout) { @stdout }
     let(:stderr) { @stderr }
 
@@ -76,6 +79,7 @@ RSpec.describe CreateGithubRelease::Tasks::CreateGithubRelease do
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
+        expect(stderr).to match(/^ERROR: Could not generate the changelog/)
       end
     end
 
@@ -88,6 +92,7 @@ RSpec.describe CreateGithubRelease::Tasks::CreateGithubRelease do
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
+        expect(stderr).to match(/^ERROR: Could not create a temporary file/)
       end
     end
 
@@ -102,6 +107,7 @@ RSpec.describe CreateGithubRelease::Tasks::CreateGithubRelease do
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
+        expect(stderr).to match(/^ERROR: Could not create release/)
       end
     end
   end

@@ -9,7 +9,10 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateVersion do
   end
 
   describe '#run' do
-    subject { @stdout, @stderr = capture_output { task.run } }
+    subject do
+      @stdout, @stderr, exception = capture_output { task.run }
+      raise exception if exception
+    end
     let(:stdout) { @stdout }
     let(:stderr) { @stderr }
 
@@ -35,6 +38,7 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateVersion do
       let(:bump_result) { 1 }
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
+        expect(stderr).to match(/^ERROR: Could not bump version/)
       end
     end
 
@@ -43,6 +47,7 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateVersion do
       let(:git_exitstatus) { 1 }
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
+        expect(stderr).to match(%r{^ERROR: Could not stage changes to lib/git/version\.rb})
       end
     end
   end
