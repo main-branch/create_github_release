@@ -78,3 +78,8 @@ require 'yardstick/rake/verify'
 Yardstick::Rake::Verify.new(:'yard:coverage') do |verify|
   verify.threshold = 100
 end
+
+# Additional cleanup
+
+CLEAN << 'tmp'
+CLEAN << 'sig'
