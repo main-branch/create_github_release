@@ -46,11 +46,11 @@ module CreateGithubRelease
     # @return [Array<Class>] The tasks that will be run to create a new Github release
     #
     TASKS = [
-      CreateGithubRelease::Tasks::CreateReleaseBranch,
-      CreateGithubRelease::Tasks::UpdateChangelog,
-      CreateGithubRelease::Tasks::UpdateVersion,
-      CreateGithubRelease::Tasks::CommitRelease,
       CreateGithubRelease::Tasks::CreateReleaseTag,
+      CreateGithubRelease::Tasks::CreateReleaseBranch,
+      CreateGithubRelease::Tasks::UpdateVersion,
+      CreateGithubRelease::Tasks::UpdateChangelog,
+      CreateGithubRelease::Tasks::CommitRelease,
       CreateGithubRelease::Tasks::PushRelease,
       CreateGithubRelease::Tasks::CreateGithubRelease,
       CreateGithubRelease::Tasks::CreateReleasePullRequest
