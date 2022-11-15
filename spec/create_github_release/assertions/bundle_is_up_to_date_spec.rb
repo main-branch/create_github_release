@@ -42,7 +42,7 @@ RSpec.describe CreateGithubRelease::Assertions::BundleIsUpToDate do
         let(:exitstatus) { 1 }
         it 'should fail' do
           expect { subject }.to raise_error(SystemExit)
-          expect(stderr).to match(/^ERROR: bundle update failed/)
+          expect(stderr).to start_with('ERROR: bundle update failed')
         end
       end
     end
@@ -69,7 +69,7 @@ RSpec.describe CreateGithubRelease::Assertions::BundleIsUpToDate do
         let(:exitstatus) { 1 }
         it 'should fail' do
           expect { subject }.to raise_error(SystemExit)
-          expect(stderr).to match(/^ERROR: bundle install failed/)
+          expect(stderr).to start_with('ERROR: bundle install failed')
         end
       end
     end

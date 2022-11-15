@@ -37,7 +37,7 @@ RSpec.describe CreateGithubRelease::Assertions::DockerIsRunning do
       let(:exitstatus) { 1 }
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: Docker is not installed or not running/)
+        expect(stderr).to start_with('ERROR: Docker is not installed or not running')
       end
     end
   end

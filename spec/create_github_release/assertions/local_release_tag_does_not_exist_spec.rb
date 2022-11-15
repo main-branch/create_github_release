@@ -48,7 +48,7 @@ RSpec.describe CreateGithubRelease::Assertions::LocalReleaseTagDoesNotExist do
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: Local tag 'v1.0.0' already exists/)
+        expect(stderr).to start_with("ERROR: Local tag 'v1.0.0' already exists")
       end
     end
 
@@ -61,7 +61,7 @@ RSpec.describe CreateGithubRelease::Assertions::LocalReleaseTagDoesNotExist do
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: Could not list tags/)
+        expect(stderr).to start_with('ERROR: Could not list tags')
       end
     end
   end

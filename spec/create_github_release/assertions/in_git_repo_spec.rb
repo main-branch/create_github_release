@@ -37,7 +37,7 @@ RSpec.describe CreateGithubRelease::Assertions::InGitRepo do
       let(:exitstatus) { 1 }
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: You are not in a git repo/)
+        expect(stderr).to start_with('ERROR: You are not in a git repo')
       end
     end
   end

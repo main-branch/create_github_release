@@ -119,7 +119,7 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateChangelog do
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: Could not stage changes to CHANGELOG.md/)
+        expect(stderr).to start_with('ERROR: Could not stage changes to CHANGELOG.md')
       end
     end
 
@@ -128,7 +128,7 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateChangelog do
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: Could not generate the release notes/)
+        expect(stderr).to start_with('ERROR: Could not generate the release notes')
       end
     end
 
@@ -140,7 +140,7 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateChangelog do
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: Could not write to CHANGELOG.md: Permission denied/)
+        expect(stderr).to start_with('ERROR: Could not write to CHANGELOG.md: Permission denied')
       end
     end
 
@@ -158,7 +158,7 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateChangelog do
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: Could not stage changes to CHANGELOG.md/)
+        expect(stderr).to start_with('ERROR: Could not stage changes to CHANGELOG.md')
       end
     end
   end

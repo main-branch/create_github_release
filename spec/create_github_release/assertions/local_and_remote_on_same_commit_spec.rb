@@ -56,7 +56,7 @@ RSpec.describe CreateGithubRelease::Assertions::LocalAndRemoteOnSameCommit do
       let(:remote_commit) { '9535c0' }
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to match(/^ERROR: Local and remote are not on the same commit/)
+        expect(stderr).to start_with('ERROR: Local and remote are not on the same commit')
       end
     end
   end
