@@ -32,7 +32,10 @@ module CreateGithubRelease
       #
       def assert
         print 'Checking that there are no uncommitted changes...'
-        if `git status --porcelain | wc -l`.to_i.zero? && $CHILD_STATUS.success?
+        change_count = `git status --porcelain | wc -l`.to_i
+        error "git status command failed: #{$CHILD_STATUS.exitstatus}" unless $CHILD_STATUS.success?
+
+        if change_count.zero?
           puts 'OK'
         else
           error 'There are uncommitted changes'

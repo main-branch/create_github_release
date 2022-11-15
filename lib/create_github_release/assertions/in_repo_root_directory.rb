@@ -34,6 +34,8 @@ module CreateGithubRelease
       def assert
         print "Checking that you are in the repo's root directory..."
         toplevel_directory = `git rev-parse --show-toplevel`.chomp
+        error "git rev-parse failed: #{$CHILD_STATUS.exitstatus}" unless $CHILD_STATUS.success?
+
         if toplevel_directory == FileUtils.pwd
           puts 'OK'
         else

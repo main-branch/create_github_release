@@ -54,27 +54,37 @@ def execute_mocked_command(mocked_commands, command)
   mocked_command.stdout
 end
 
+# rubocop:disable Metrics/MethodLength
+
 # Captures stdout and stderr output from a block of code
 #
 # @example
-#   stdout, stderr = capture_output { puts 'hello'; warn 'world' }
+#   stdout, stderr, exception = capture_output { puts 'hello'; warn 'world' }
 #   stdout # => "hello\n"
 #   stderr # => "world\n"
+#   exception # => nil
 #
 # @example Used to test an assertion
-#   subject { @stdout, @stderr = capture_output { assertion.assert } }
+#   subject { @stdout, @stderr, exception } = capture_output { assertion.assert } }
 #
 # @return [Array<String, String>] stdout and stderr output
 #
 def capture_output(&block)
   $stdout = StringIO.new
   $stderr = StringIO.new
-  block.call
-  [$stdout.string, $stderr.string]
+  exception = nil
+  begin
+    block.call
+  rescue SystemExit, StandardError => e
+    exception = e
+  end
+  [$stdout.string, $stderr.string, exception]
 ensure
   $stdout = STDOUT
   $stderr = STDERR
 end
+
+# rubocop:enable Metrics/MethodLength
 
 # Make sure to require your project AFTER SimpleCov.start
 #

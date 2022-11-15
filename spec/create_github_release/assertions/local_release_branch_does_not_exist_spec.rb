@@ -14,7 +14,10 @@ RSpec.describe CreateGithubRelease::Assertions::LocalReleaseBranchDoesNotExist d
   end
 
   describe '#assert' do
-    subject { @stdout, @stderr = capture_output { assertion.assert } }
+    subject do
+      @stdout, @stderr, exception = capture_output { assertion.assert }
+      raise exception if exception
+    end
     let(:stdout) { @stdout }
     let(:stderr) { @stderr }
 
@@ -45,6 +48,7 @@ RSpec.describe CreateGithubRelease::Assertions::LocalReleaseBranchDoesNotExist d
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
+        expect(stderr).to match(/^ERROR: 'current-branch' already exists/)
       end
     end
 
@@ -57,6 +61,7 @@ RSpec.describe CreateGithubRelease::Assertions::LocalReleaseBranchDoesNotExist d
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
+        expect(stderr).to match(/^ERROR: Could not list branches/)
       end
     end
   end

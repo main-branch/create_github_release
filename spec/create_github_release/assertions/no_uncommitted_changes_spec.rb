@@ -10,7 +10,10 @@ RSpec.describe CreateGithubRelease::Assertions::NoUncommittedChanges do
   end
 
   describe '#assert' do
-    subject { @stdout, @stderr = capture_output { assertion.assert } }
+    subject do
+      @stdout, @stderr, exception = capture_output { assertion.assert }
+      raise exception if exception
+    end
     let(:stdout) { @stdout }
     let(:stderr) { @stderr }
 
@@ -31,6 +34,7 @@ RSpec.describe CreateGithubRelease::Assertions::NoUncommittedChanges do
       let(:mocked_commands) { [MockedCommand.new(git_command, stdout: "99\n")] }
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
+        expect(stderr).to match(/^ERROR: There are uncommitted changes/)
       end
     end
 
@@ -38,6 +42,7 @@ RSpec.describe CreateGithubRelease::Assertions::NoUncommittedChanges do
       let(:mocked_commands) { [MockedCommand.new(git_command, exitstatus: 1)] }
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
+        expect(stderr).to match(/^ERROR: git status command failed: 1/)
       end
     end
   end

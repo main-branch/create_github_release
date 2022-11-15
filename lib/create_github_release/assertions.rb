@@ -1,5 +1,13 @@
 # frozen_string_literal: true
 
+module CreateGithubRelease
+  # Assertions used to validate that everything is ready to create the release
+  #
+  # @api public
+  #
+  module Assertions; end
+end
+
 require_relative 'assertions/bundle_is_up_to_date'
 require_relative 'assertions/changelog_docker_container_exists'
 require_relative 'assertions/docker_is_running'
