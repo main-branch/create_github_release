@@ -7,8 +7,6 @@ module CreateGithubRelease
   module Assertions
     # Assert that the 'gh' command is in the path
     #
-    # Checks both the local repository and the remote repository.
-    #
     # @api public
     #
     class GhCommandExists < AssertionBase

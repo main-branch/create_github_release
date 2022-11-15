@@ -40,6 +40,12 @@ module CreateGithubRelease
       @options = options
     end
 
+    # The assertions that must be true for a new Github release to be created
+    #
+    # The assertions are run in the order they are defined in this array.
+    #
+    # @return [Array<Class>] The assertions that must be true for a new Github release to be created
+    #
     ASSERTIONS = [
       CreateGithubRelease::Assertions::GitCommandExists,
       CreateGithubRelease::Assertions::BundleIsUpToDate,
@@ -69,7 +75,7 @@ module CreateGithubRelease
     #
     # @return [void]
     #
-    # @raises [SystemExit] if any assertion fails
+    # @raise [SystemExit] if any assertion fails
     #
     def make_assertions
       ASSERTIONS.each do |assertion_class|

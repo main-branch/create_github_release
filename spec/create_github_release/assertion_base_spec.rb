@@ -10,4 +10,9 @@ RSpec.describe CreateGithubRelease::AssertionBase do
       expect { subject }.to raise_error(NotImplementedError)
     end
   end
+
+  describe '#options' do
+    subject { assertion.options }
+    it { is_expected.to eq(options) }
+  end
 end
