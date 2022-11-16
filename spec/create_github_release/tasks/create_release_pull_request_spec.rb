@@ -2,7 +2,13 @@
 
 RSpec.describe CreateGithubRelease::Tasks::CreateReleasePullRequest do
   let(:task) { described_class.new(options) }
-  let(:options) { CreateGithubRelease::Options.new { |o| o.release_type = 'major' } }
+  let(:options) do
+    CreateGithubRelease::Options.new do |o|
+      o.release_type = 'major'
+      o.current_version = '0.1.0'
+      o.default_branch = 'main'
+    end
+  end
 
   before do
     allow(task).to receive(:`).with(String) { |command| execute_mocked_command(mocked_commands, command) }
