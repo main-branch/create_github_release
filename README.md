@@ -1,5 +1,10 @@
 # The create_github_release Gem
 
+[![Gem Version](https://badge.fury.io/rb/create_github_release.svg)](https://badge.fury.io/rb/create_github_release)
+ [![Build Status](https://github.com/main-branch/create_github_release/workflows/Ruby/badge.svg?branch=main)](https://github.com/main-branch/create_github_release/actions?query=workflow%3ARuby)
+ [![Maintainability](https://api.codeclimate.com/v1/badges/b8c0af10b15a0ffeb1a1/maintainability)](https://codeclimate.com/github/main-branch/create_github_release/maintainability)
+ [![Test Coverage](https://api.codeclimate.com/v1/badges/b8c0af10b15a0ffeb1a1/test_coverage)](https://codeclimate.com/github/main-branch/create_github_release/test_coverage)
+
 Create a GitHub release for a new gem version.
 
 To create a new GitHub release for a gem, run the following from the top level
