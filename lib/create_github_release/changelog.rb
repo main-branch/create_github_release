@@ -291,11 +291,7 @@ module CreateGithubRelease
     # @return [String] The changelog with the new release details
     #
     def to_s
-      String.new.tap do |changelog|
-        changelog << formatted_front_matter unless front_matter.empty?
-        changelog << release_header << release_description
-        changelog << formatted_body unless body.empty?
-      end
+      formatted_front_matter + release_header + release_description + formatted_body
     end
 
     private
@@ -304,14 +300,14 @@ module CreateGithubRelease
     # @return [String] The front matter formatted to insert into the changelog
     # @api private
     def formatted_front_matter
-      "#{front_matter}\n\n"
+      front_matter.empty? ? '' : "#{front_matter}\n\n"
     end
 
     # The body formatted to insert into the changelog
     # @return [String] The body formatted to insert into the changelog
     # @api private
     def formatted_body
-      "\n#{body}\n"
+      body.empty? ? '' : "\n#{body}\n"
     end
 
     # The index of the line in @lines where the front matter begins
