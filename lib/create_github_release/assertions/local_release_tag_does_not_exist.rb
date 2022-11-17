@@ -34,7 +34,7 @@ module CreateGithubRelease
         tags = `git tag --list "#{options.tag}"`.chomp
         error 'Could not list tags' unless $CHILD_STATUS.success?
 
-        if tags.split.empty?
+        if tags == ''
           puts 'OK'
         else
           error "Local tag '#{options.tag}' already exists"

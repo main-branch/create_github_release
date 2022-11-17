@@ -30,7 +30,7 @@ RSpec.describe CreateGithubRelease::Assertions::LocalReleaseBranchDoesNotExist d
     context 'when the local release branch does not exist' do
       let(:mocked_commands) do
         [
-          MockedCommand.new('git branch --list "current-branch" | wc -l', stdout: "0\n")
+          MockedCommand.new('git branch --list "current-branch"', stdout: "\n")
         ]
       end
 
@@ -42,13 +42,13 @@ RSpec.describe CreateGithubRelease::Assertions::LocalReleaseBranchDoesNotExist d
     context 'when the local release branch exists' do
       let(:mocked_commands) do
         [
-          MockedCommand.new('git branch --list "current-branch" | wc -l', stdout: "1\n")
+          MockedCommand.new('git branch --list "current-branch"', stdout: "  current-branch\n")
         ]
       end
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to start_with("ERROR: 'current-branch' already exists")
+        expect(stderr).to start_with("ERROR: Local branch 'current-branch' already exists")
       end
     end
 
