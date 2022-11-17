@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.2.1 (2022-11-16)
+
+[Full Changelog](https://github.com/main-branch/create_github_release/compare/v0.2.0...v0.2.1)
+
+* 14b04ec Normalize local release branch and local release tag assertions' (#25)
+* 025fa29 Refactor LocalReleaseBranchDoesNotExist#assert (#24)
+* 7880c89 Further reduce the complexity of Changelog@to_s (#21)
+* 2aa335e Fix high cognitive complexity of Changelog#to_s (#20)
+* 42c263a Add CodeClimate badges and test coverage reporting (#19)
+* 904d6cb Release v0.2.0
+
 ## v0.2.0 (2022-11-15)
 
 [Full Changelog](https://github.com/main-branch/create_github_release/compare/v0.1.0...v0.2.0)
