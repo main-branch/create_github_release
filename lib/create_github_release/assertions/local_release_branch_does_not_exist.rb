@@ -31,10 +31,12 @@ module CreateGithubRelease
       def assert
         print "Checking that local branch ' #{options.branch}' does not exist..."
 
-        if `git branch --list '#{options.branch}' | wc -l`.to_i.zero? && $CHILD_STATUS.success?
+        branch_count = `git branch --list '#{options.branch}' | wc -l`.to_i
+        error 'Could not list branches' unless $CHILD_STATUS.success?
+
+        if branch_count.zero?
           puts 'OK'
         else
-          error 'Could not list branches' unless $CHILD_STATUS.success?
           error "'#{options.branch}' already exists."
         end
       end
