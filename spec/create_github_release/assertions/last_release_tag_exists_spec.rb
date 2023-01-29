@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-RSpec.describe CreateGithubRelease::Assertions::LocalReleaseTagDoesNotExist do
+RSpec.describe CreateGithubRelease::Assertions::LastReleaseTagExists do
   let(:assertion) { described_class.new(project) }
   let(:options) { CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' } }
-  let(:project) { CreateGithubRelease::Project.new(options) { |p| p.next_release_tag = 'v1.0.0' } }
+  let(:project) { CreateGithubRelease::Project.new(options) { |p| p.last_release_tag = 'v0.0.0' } }
 
   before do
     allow(assertion).to receive(:`).with(String) { |command| execute_mocked_command(mocked_commands, command) }
@@ -17,16 +17,23 @@ RSpec.describe CreateGithubRelease::Assertions::LocalReleaseTagDoesNotExist do
     let(:stdout) { @stdout }
     let(:stderr) { @stderr }
 
-    before do
-      allow(File).to receive(:exist?).and_call_original
-    end
-
-    let(:git_command) { 'git branch --show-current' }
-
-    context 'when the local release tag does not exist' do
+    context 'when the last release tag does not exist' do
       let(:mocked_commands) do
         [
-          MockedCommand.new('git tag --list "v1.0.0"')
+          MockedCommand.new('git tag --list "v0.0.0"', stdout: "\n")
+        ]
+      end
+
+      it 'should fail' do
+        expect { subject }.to raise_error(SystemExit)
+        expect(stderr).to start_with("ERROR: Last release tag 'v0.0.0' does not exist")
+      end
+    end
+
+    context 'when the last release tag exists' do
+      let(:mocked_commands) do
+        [
+          MockedCommand.new('git tag --list "v0.0.0"', stdout: "v0.0.0\n")
         ]
       end
 
@@ -35,23 +42,10 @@ RSpec.describe CreateGithubRelease::Assertions::LocalReleaseTagDoesNotExist do
       end
     end
 
-    context 'when the local release tag exists' do
-      let(:mocked_commands) do
-        [
-          MockedCommand.new('git tag --list "v1.0.0"', stdout: "v1.0.0\n")
-        ]
-      end
-
-      it 'should fail' do
-        expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to start_with("ERROR: Local tag 'v1.0.0' already exists")
-      end
-    end
-
     context 'when the git command fails' do
       let(:mocked_commands) do
         [
-          MockedCommand.new('git tag --list "v1.0.0"', exitstatus: 1)
+          MockedCommand.new('git tag --list "v0.0.0"', exitstatus: 1)
         ]
       end
 

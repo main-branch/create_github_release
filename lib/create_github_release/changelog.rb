@@ -22,16 +22,13 @@ module CreateGithubRelease
     #     * 07a1167 Release v0.1.0 (#1)
     #   EXISTING_CHANGELOG
     #
-    #   new_release_tag = 'v1.0.0'
-    #   new_release_date = Date.parse('2022-11-10')
-    #   new_release_description = <<~RELEASE
+    #   next_release_description = <<~next_release_DESCRIPTION
+    #     ## v1.0.0 (2022-11-10)
+    #
     #     * f5e69d6 Release v1.0.0 (#4)
-    #     * 8fe479b Update documentation for initial GA release (#3)
-    #   RELEASE
+    #   next_release_DESCRIPTION
     #
-    #   new_release = CreateGithubRelease::Release.new(new_release_tag, new_release_date, new_release_description)
-    #
-    #   changelog = CreateGithubRelease::Changelog.new(existing_changelog, new_release)
+    #   changelog = CreateGithubRelease::Changelog.new(existing_changelog, next_release_description)
     #
     #   expected_new_changelog = <<~CHANGELOG
     #     # Change Log
@@ -41,7 +38,6 @@ module CreateGithubRelease
     #     ## v1.0.0 (2022-11-10)
     #
     #     * f5e69d6 Release v1.0.0 (#4)
-    #     * 8fe479b Update documentation for initial GA release (#3)
     #
     #     ## v0.1.0 (2022-10-31)
     #
@@ -50,15 +46,15 @@ module CreateGithubRelease
     #
     #   changelog.front_matter # =>  "# Change Log\n\nList of changes in each release of this project."
     #   changelog.body # => "## v0.1.0 (2022-10-31)\n\n* 07a1167 Release v0.1.0 (#1)"
-    #   changelog.new_release # => #<CreateGithubRelease::Release:0x000000010761aac8 ...>
+    #   changelog.next_release_description # => "## v1.0.0 (2022-11-10)\n\n..."
     #   changelog.to_s == expected_new_changelog # => true
     #
     # @param existing_changelog [String] Contents of the changelog as a string
-    # @param new_release [CreateGihubRelease::Release] The new release to add to the changelog
+    # @param next_release_description [String] The description of the next release to add to the changelog
     #
-    def initialize(existing_changelog, new_release)
+    def initialize(existing_changelog, next_release_description)
       @existing_changelog = existing_changelog
-      @new_release = new_release
+      @next_release_description = next_release_description
 
       @lines = existing_changelog.lines.map(&:chomp)
     end
@@ -75,9 +71,9 @@ module CreateGithubRelease
     #     ...
     #   CHANGELOG
     #
-    #   new_release = CreateGithubRelease::Release.new('v0.1.0', Date.today, '...')
+    #   next_release_description = '## v1.0.0\n\n* 8374b31 Add FizzBuzz'
     #
-    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, new_release)
+    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, next_release_description)
     #   changelog.front_matter # => "This is the front matter\n"
     #
     # @example Changelog without front matter
@@ -86,26 +82,26 @@ module CreateGithubRelease
     #     ...
     #   CHANGELOG
     #
-    #   new_release = CreateGithubRelease::Release.new('v0.1.0', Date.today, '...')
+    #   next_release_description = '## v1.0.0\n\n* 8374b31 Add FizzBuzz'
     #
-    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, new_release)
+    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, next_release_description)
     #   changelog.front_matter # => ""
     #
     # @example An empty changelog
     #   changelog_text = <<~CHANGELOG
     #   CHANGELOG
     #
-    #   new_release = CreateGithubRelease::Release.new('v0.1.0', Date.today, '...')
+    #   next_release_description = '## v1.0.0\n\n* 8374b31 Add FizzBuzz'
     #
-    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, new_release)
+    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, next_release_description)
     #   changelog.front_matter # => ""
     #
     # @example An empty changelog
     #   changelog_text = ""
     #
-    #   new_release = CreateGithubRelease::Release.new('v0.1.0', Date.today, '...')
+    #   next_release_description = '## v1.0.0\n\n* 8374b31 Add FizzBuzz'
     #
-    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, new_release)
+    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, next_release_description)
     #   changelog.front_matter # => ""
     #
     # @return [String] The front matter of the changelog
@@ -124,9 +120,9 @@ module CreateGithubRelease
     #     ...
     #   CHANGELOG
     #
-    #   new_release = CreateGithubRelease::Release.new('v0.1.0', Date.today, '...')
+    #   next_release_description = '## v1.0.0\n\n* 8374b31 Add FizzBuzz'
     #
-    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, new_release)
+    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, next_release_description)
     #   changelog.body # => "## v0.1.0\n..."
     #
     # @example Changelog without front matter
@@ -135,9 +131,9 @@ module CreateGithubRelease
     #     ...
     #   CHANGELOG
     #
-    #   new_release = CreateGithubRelease::Release.new('v0.1.0', Date.today, '...')
+    #   next_release_description = '## v1.0.0\n\n* 8374b31 Add FizzBuzz'
     #
-    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, new_release)
+    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, next_release_description)
     #   changelog.body # => "## v0.1.0\n..."
     #
     # @example Changelog without a body
@@ -145,26 +141,26 @@ module CreateGithubRelease
     #     This is the front matter
     #   CHANGELOG
     #
-    #   new_release = CreateGithubRelease::Release.new('v0.1.0', Date.today, '...')
+    #   next_release_description = '## v1.0.0\n\n* 8374b31 Add FizzBuzz'
     #
-    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, new_release)
+    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, next_release_description)
     #   changelog.body # => ""
     #
     # @example An empty changelog (new line only)
     #   changelog_text = <<~CHANGELOG
     #   CHANGELOG
     #
-    #   new_release = CreateGithubRelease::Release.new('v0.1.0', Date.today, '...')
+    #   next_release_description = '## v1.0.0\n\n* 8374b31 Add FizzBuzz'
     #
-    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, new_release)
+    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, next_release_description)
     #   changelog.body # => ""
     #
     # @example An empty changelog (empty string)
     #   changelog_text = ""
     #
-    #   new_release = CreateGithubRelease::Release.new('v0.1.0', Date.today, '...')
+    #   next_release_description = '## v1.0.0\n\n* 8374b31 Add FizzBuzz'
     #
-    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, new_release)
+    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, next_release_description)
     #   changelog.body # => ""
     #
     # @return [String] The body of the existing changelog
@@ -184,16 +180,14 @@ module CreateGithubRelease
     #
     attr_reader :existing_changelog
 
-    # The new release to add to the changelog
+    # The description of the new release to add to the changelog
     #
     # @example
-    #   changelog.new_release.tag # => 'v1.0.0'
-    #   changelog.new_release.date # => #<Date: 2018-06-30>
-    #   changelog.new_release.description # => "[Full Changelog](...)..."
+    #   changelog.next_release_description # => "# v1.0.0 - 2018-06-30\n\n[Full Changelog](...)..."
     #
-    # @return [CreateGithubRelease::Release] The new release to add to the changelog
+    # @return [String] The description of the new release to add to the changelog
     #
-    attr_reader :new_release
+    attr_reader :next_release_description
 
     # The changelog with the new release
     #
@@ -204,9 +198,7 @@ module CreateGithubRelease
     #     ...
     #   CHANGELOG
     #
-    #   new_release = CreateGithubRelease::Release.new(
-    #     'v1.0.0', Date.parse('2022-11-08'), '...release description...'
-    #   )
+    #   next_release_description = '## v1.0.0\n\n* 8374b31 Add FizzBuzz'
     #
     #   expected_changelog = <<~CHANGELOG
     #     This is the front matter
@@ -218,7 +210,7 @@ module CreateGithubRelease
     #     ...
     #   CHANGELOG
     #
-    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, new_release)
+    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, next_release_description)
     #
     #   changelog.to_s == expected_changelog # => true
     #
@@ -228,9 +220,7 @@ module CreateGithubRelease
     #     ...
     #   CHANGELOG
     #
-    #   new_release = CreateGithubRelease::Release.new(
-    #     'v1.0.0', Date.parse('2022-11-08'), '...release description...'
-    #   )
+    #   next_release_description = '## v1.0.0\n\n* 8374b31 Add FizzBuzz'
     #
     #   expected_changelog = <<~CHANGELOG
     #     ## v1.0.0 (2022-11-08)
@@ -240,7 +230,7 @@ module CreateGithubRelease
     #     ...
     #   CHANGELOG
     #
-    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, new_release)
+    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, next_release_description)
     #
     #   changelog.to_s == expected_changelog # => true
     #
@@ -249,9 +239,7 @@ module CreateGithubRelease
     #     This is the front matter
     #   CHANGELOG
     #
-    #   new_release = CreateGithubRelease::Release.new(
-    #     'v1.0.0', Date.parse('2022-11-08'), '...release description...'
-    #   )
+    #   next_release_description = '## v1.0.0\n\n* 8374b31 Add FizzBuzz'
     #
     #   expected_changelog = <<~CHANGELOG
     #     This is the front matter
@@ -260,7 +248,7 @@ module CreateGithubRelease
     #     ...release description...
     #   CHANGELOG
     #
-    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, new_release)
+    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, next_release_description)
     #
     #   changelog.to_s == expected_changelog # => true
     #
@@ -271,9 +259,7 @@ module CreateGithubRelease
     #     ...
     #   CHANGELOG
     #
-    #   new_release = CreateGithubRelease::Release.new(
-    #     'v1.0.0', Date.parse('2022-11-08'), ''
-    #   )
+    #   next_release_description = '## v1.0.0\n\n* 8374b31 Add FizzBuzz'
     #
     #   expected_changelog = <<~CHANGELOG
     #     This is the front matter
@@ -284,14 +270,14 @@ module CreateGithubRelease
     #     ...
     #   CHANGELOG
     #
-    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, new_release)
+    #   changelog = CreateGithubRelease::Changelog.new(changelog_text, next_release_description)
     #
     #   changelog.to_s == expected_changelog # => true
     #
     # @return [String] The changelog with the new release details
     #
     def to_s
-      formatted_front_matter + release_header + release_description + formatted_body
+      formatted_front_matter + next_release_description + formatted_body
     end
 
     private
@@ -352,20 +338,6 @@ module CreateGithubRelease
           i -= 1 while i > body_start && lines[i - 1] =~ /^\s*$/
           i
         end
-    end
-
-    # The release header to output in the changelog
-    # @return [String] The release header to output in the changelog
-    # @api private
-    def release_header
-      "## #{new_release.tag} (#{new_release.date.strftime('%Y-%m-%d')})\n"
-    end
-
-    # The release description to output in the changelog
-    # @return [String] The release description to output in the changelog
-    # @api private
-    def release_description
-      new_release.description.empty? ? '' : "\n#{new_release.description.chomp}\n"
     end
 
     # Line number where the body of the changelog starts

@@ -48,7 +48,13 @@ class MockedCommand
 end
 
 def execute_mocked_command(mocked_commands, command)
-  mocked_command = mocked_commands.find { |c| c.command.match(command) }
+  mocked_command = mocked_commands.find do |c|
+    if c.command.is_a?(Regexp)
+      c.command.match(command)
+    else
+      c.command == command
+    end
+  end
   raise "Command '#{command}' was not mocked" unless mocked_command
 
   `exit #{mocked_command.exitstatus}`

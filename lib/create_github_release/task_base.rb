@@ -9,11 +9,14 @@ module CreateGithubRelease
   # @api private
   #
   class TaskBase
-    # Create a new tasks object and save the given `options`
-    # @param options [CreateGithubRelease::Options] the options
+    # Create a new tasks object and save the given `project`
+    # @param project [CreateGithubRelease::Project] the project to create the release for
     # @api private
-    def initialize(options)
-      @options = options
+    def initialize(project)
+      raise ArgumentError, 'project must be a CreateGithubRelease::Project' unless
+        project.is_a?(CreateGithubRelease::Project)
+
+      @project = project
     end
 
     # This method must be overriden by a subclass
@@ -27,27 +30,27 @@ module CreateGithubRelease
       raise NotImplementedError
     end
 
-    # @!attribute [r] options
+    # @!attribute [r] project
     #
-    # The options passed to the task object
-    # @return [CreateGithubRelease::Options] the options
+    # The project passed to the task object
+    # @return [CreateGithubRelease::Project]
     # @api private
-    attr_reader :options
+    attr_reader :project
 
     # Calls `Kernel.print` if the `quiet` flag is not set in the `options`
     # @param args [Array] the arguments to pass to `Kernel.print`
     # @return [void]
     # @api private
     def print(*args)
-      super unless options.quiet
+      super unless project.quiet?
     end
 
-    # Calls `Kernel.puts` if the `quiet` flag is not set in the `options`
+    # Calls `Kernel.puts` if the `quiet` flag is not set in the `project`
     # @param args [Array] the arguments to pass to `Kernel.puts`
     # @return [void]
     # @api private
     def puts(*args)
-      super unless options.quiet
+      super unless project.quiet?
     end
 
     # Writes a message to stderr and exits with exitcode 1
@@ -58,5 +61,16 @@ module CreateGithubRelease
       warn "ERROR: #{message}"
       exit 1
     end
+
+    # `true` if the `project.verbose?` flag is `true`
+    # @return [Boolean]
+    # @api private
+    def backtick_debug?
+      project.verbose?
+    end
+
+    # This overrides the backtick operator for this class to output debug
+    # information if `verbose?` is true
+    include CreateGithubRelease::BacktickDebug
   end
 end

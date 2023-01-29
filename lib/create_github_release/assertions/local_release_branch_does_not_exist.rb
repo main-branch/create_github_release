@@ -15,8 +15,9 @@ module CreateGithubRelease
       # @example
       #   require 'create_github_release'
       #
-      #   options = CreateGithubRelease::Options.new { |o| o.release_type = 'major' }
-      #   assertion = CreateGithubRelease::Assertions::LocalReleaseBranchDoesNotExist.new(options)
+      #   options = CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' }
+      #   project = CreateGithubRelease::Project.new(options)
+      #   assertion = CreateGithubRelease::Assertions::LocalReleaseBranchDoesNotExist.new(project)
       #   begin
       #     assertion.assert
       #     puts 'Assertion passed'
@@ -29,15 +30,15 @@ module CreateGithubRelease
       # @raise [SystemExit] if the assertion fails
       #
       def assert
-        print "Checking that local branch ' #{options.branch}' does not exist..."
+        print "Checking that local branch ' #{project.release_branch}' does not exist..."
 
-        branches = `git branch --list "#{options.branch}"`.chomp
+        branches = `git branch --list "#{project.release_branch}"`.chomp
         error 'Could not list branches' unless $CHILD_STATUS.success?
 
         if branches == ''
           puts 'OK'
         else
-          error "Local branch '#{options.branch}' already exists"
+          error "Local branch '#{project.release_branch}' already exists"
         end
       end
     end

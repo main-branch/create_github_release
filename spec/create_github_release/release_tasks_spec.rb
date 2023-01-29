@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe CreateGithubRelease::ReleaseTasks do
-  let(:release_tasks) { described_class.new(options) }
-  let(:options) { CreateGithubRelease::Options.new { |o| o.release_type = 'major' } }
+  let(:release_tasks) { described_class.new(project) }
+  let(:project) { CreateGithubRelease::Project.new(options) }
+  let(:options) { CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' } }
 
   describe '#run' do
     subject { release_tasks.run }
@@ -18,7 +19,7 @@ RSpec.describe CreateGithubRelease::ReleaseTasks do
       @tasks_called = tasks_called
       tasks.each do |task|
         task_class = CreateGithubRelease::Tasks.const_get(task)
-        expect(task_class).to receive(:new).with(options) do |_options|
+        expect(task_class).to receive(:new).with(project) do |_project|
           Class.new do
             @task = task
             @tasks_called = tasks_called

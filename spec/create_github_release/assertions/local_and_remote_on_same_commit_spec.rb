@@ -1,17 +1,18 @@
 # frozen_string_literal: true
 
 RSpec.describe CreateGithubRelease::Assertions::LocalAndRemoteOnSameCommit do
-  let(:assertion) { described_class.new(options) }
+  let(:assertion) { described_class.new(project) }
   let(:options) do
-    CreateGithubRelease::Options.new do |o|
+    CreateGithubRelease::CommandLineOptions.new do |o|
       o.release_type = 'major'
       o.default_branch = 'default-branch'
     end
   end
+  let(:project) { CreateGithubRelease::Project.new(options) }
 
   before do
     allow(assertion).to receive(:`).with(String) { |command| execute_mocked_command(mocked_commands, command) }
-    allow(options).to receive(:`).with(String) { |command| execute_mocked_command(mocked_commands, command) }
+    allow(project).to receive(:`).with(String) { |command| execute_mocked_command(mocked_commands, command) }
   end
 
   describe '#assert' do

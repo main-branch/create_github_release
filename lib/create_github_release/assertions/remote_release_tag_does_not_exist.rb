@@ -15,8 +15,9 @@ module CreateGithubRelease
       # @example
       #   require 'create_github_release'
       #
-      #   options = CreateGithubRelease::Options.new { |o| o.release_type = 'major' }
-      #   assertion = CreateGithubRelease::Assertions::RemoteReleaseTagDoesNotExist.new(options)
+      #   options = CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' }
+      #   project = CreateGithubRelease::Project.new(options)
+      #   assertion = CreateGithubRelease::Assertions::RemoteReleaseTagDoesNotExist.new(project)
       #   begin
       #     assertion.assert
       #     puts 'Assertion passed'
@@ -29,13 +30,13 @@ module CreateGithubRelease
       # @raise [SystemExit] if the assertion fails
       #
       def assert
-        print "Checking that the remote tag '#{options.tag}' does not exist..."
-        `git ls-remote --tags --exit-code '#{options.remote}' #{options.tag} >/dev/null 2>&1`
+        print "Checking that the remote tag '#{project.next_release_tag}' does not exist..."
+        `git ls-remote --tags --exit-code '#{project.remote}' #{project.next_release_tag} >/dev/null 2>&1`
         if $CHILD_STATUS.exitstatus == 2
           puts 'OK'
         else
           error 'Could not list tags' unless $CHILD_STATUS.success?
-          error "Remote tag '#{options.tag}' already exists"
+          error "Remote tag '#{project.next_release_tag}' already exists"
         end
       end
     end

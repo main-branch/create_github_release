@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
 RSpec.describe CreateGithubRelease::Assertions::LocalReleaseBranchDoesNotExist do
-  let(:assertion) { described_class.new(options) }
+  let(:assertion) { described_class.new(project) }
   let(:options) do
-    CreateGithubRelease::Options.new do |o|
+    CreateGithubRelease::CommandLineOptions.new do |o|
       o.release_type = 'major'
-      o.branch = 'current-branch'
+      o.release_branch = 'release-branch'
     end
   end
+  let(:project) { CreateGithubRelease::Project.new(options) }
 
   before do
     allow(assertion).to receive(:`).with(String) { |command| execute_mocked_command(mocked_commands, command) }
@@ -30,7 +31,7 @@ RSpec.describe CreateGithubRelease::Assertions::LocalReleaseBranchDoesNotExist d
     context 'when the local release branch does not exist' do
       let(:mocked_commands) do
         [
-          MockedCommand.new('git branch --list "current-branch"', stdout: "\n")
+          MockedCommand.new('git branch --list "release-branch"', stdout: "\n")
         ]
       end
 
@@ -42,20 +43,20 @@ RSpec.describe CreateGithubRelease::Assertions::LocalReleaseBranchDoesNotExist d
     context 'when the local release branch exists' do
       let(:mocked_commands) do
         [
-          MockedCommand.new('git branch --list "current-branch"', stdout: "  current-branch\n")
+          MockedCommand.new('git branch --list "release-branch"', stdout: "  release-branch\n")
         ]
       end
 
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to start_with("ERROR: Local branch 'current-branch' already exists")
+        expect(stderr).to start_with("ERROR: Local branch 'release-branch' already exists")
       end
     end
 
     context 'when the git command fails' do
       let(:mocked_commands) do
         [
-          MockedCommand.new('git branch --list "current-branch" | wc -l', stdout: "0\n", exitstatus: 1)
+          MockedCommand.new('git branch --list "release-branch"', stdout: "0\n", exitstatus: 1)
         ]
       end
 

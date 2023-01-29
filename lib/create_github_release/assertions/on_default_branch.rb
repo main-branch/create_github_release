@@ -17,8 +17,9 @@ module CreateGithubRelease
       # @example
       #   require 'create_github_release'
       #
-      #   options = CreateGithubRelease::Options.new { |o| o.release_type = 'major' }
-      #   assertion = CreateGithubRelease::Assertions::OnDefaultBranch.new(options)
+      #   options = CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' }
+      #   project = CreateGithubRelease::Project.new(options)
+      #   assertion = CreateGithubRelease::Assertions::OnDefaultBranch.new(project)
       #   begin
       #     assertion.assert
       #     puts 'Assertion passed'
@@ -33,10 +34,10 @@ module CreateGithubRelease
       def assert
         print 'Checking that you are on the default branch...'
         current_branch = `git branch --show-current`.chomp
-        if current_branch == options.default_branch
+        if current_branch == project.default_branch
           puts 'OK'
         else
-          error "You are not on the default branch '#{options.default_branch}'"
+          error "You are not on the default branch '#{project.default_branch}'"
         end
       end
     end

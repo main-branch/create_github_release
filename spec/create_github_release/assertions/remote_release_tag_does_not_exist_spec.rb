@@ -1,13 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe CreateGithubRelease::Assertions::RemoteReleaseTagDoesNotExist do
-  let(:assertion) { described_class.new(options) }
-  let(:options) do
-    CreateGithubRelease::Options.new do |o|
-      o.release_type = 'major'
-      o.tag = 'v1.0.0'
-    end
-  end
+  let(:assertion) { described_class.new(project) }
+  let(:options) { CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' } }
+  let(:project) { CreateGithubRelease::Project.new(options) { |p| p.next_release_tag = 'v1.0.0' } }
 
   before do
     allow(assertion).to receive(:`).with(String) { |command| execute_mocked_command(mocked_commands, command) }

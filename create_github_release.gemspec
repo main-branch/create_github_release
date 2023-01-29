@@ -40,6 +40,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'simplecov', '~> 0.21'
   spec.add_development_dependency 'simplecov-lcov', '~> 0.8'
   spec.add_development_dependency 'solargraph', '~> 0.47'
+  spec.add_development_dependency 'timecop', '~> 0.9'
   spec.add_development_dependency 'yard', '~> 0.9'
   spec.add_development_dependency 'yardstick', '~> 0.9'
 

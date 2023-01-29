@@ -17,8 +17,9 @@ module CreateGithubRelease
       # @example
       #   require 'create_github_release'
       #
-      #   options = CreateGithubRelease::Options.new { |o| o.release_type = 'major' }
-      #   assertion = CreateGithubRelease::Assertions::LocalAndRemoteOnSameCommit.new(options)
+      #   options = CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' }
+      #   project = CreateGithubRelease::Project.new(options)
+      #   assertion = CreateGithubRelease::Assertions::LocalAndRemoteOnSameCommit.new(project)
       #   begin
       #     assertion.assert
       #     puts 'Assertion passed'
@@ -33,7 +34,7 @@ module CreateGithubRelease
       def assert
         print 'Checking that local and remote are on the same commit...'
         local_commit = `git rev-parse HEAD`.chomp
-        remote_commit = `git ls-remote '#{options.remote}' '#{options.default_branch}' | cut -f 1`.chomp
+        remote_commit = `git ls-remote '#{project.remote}' '#{project.default_branch}' | cut -f 1`.chomp
         if local_commit == remote_commit
           puts 'OK'
         else

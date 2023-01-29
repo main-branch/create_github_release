@@ -15,8 +15,9 @@ module CreateGithubRelease
       # @example
       #   require 'create_github_release'
       #
-      #   options = CreateGithubRelease::Options.new { |o| o.release_type = 'major' }
-      #   assertion = CreateGithubRelease::Assertions::GhCommandExists.new(options)
+      #   options = CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' }
+      #   project = CreateGithubRelease::Project.new(options)
+      #   assertion = CreateGithubRelease::Assertions::GhCommandExists.new(project)
       #   begin
       #     assertion.assert
       #     puts 'Assertion passed'

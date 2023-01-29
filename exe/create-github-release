@@ -3,20 +3,24 @@
 
 require 'create_github_release'
 
-options = CreateGithubRelease::CommandLineParser.new.parse(ARGV)
-CreateGithubRelease::ReleaseAssertions.new(options).make_assertions
-puts unless options.quiet
-CreateGithubRelease::ReleaseTasks.new(options).run
+options = CreateGithubRelease::CommandLineParser.new.parse(*ARGV)
+pp options if options.verbose
 
-puts <<~MESSAGE unless options.quiet
-  Release '#{options.tag}' created successfully
-  See the release notes at #{options.release_url}
+project = CreateGithubRelease::Project.new(options)
+
+CreateGithubRelease::ReleaseAssertions.new(project).make_assertions
+puts unless options.quiet
+CreateGithubRelease::ReleaseTasks.new(project).run
+
+puts <<~MESSAGE unless project.quiet
+  Release '#{project.next_release_tag}' created successfully
+  See the release notes at #{project.release_url}
 
   Next steps:
   * Get someone to review and approve the release pull request
   * Merge the pull request manually from the command line with the following commands:
 
-  git checkout #{options.default_branch}
-  git merge --ff-only #{options.branch}
+  git checkout #{project.default_branch}
+  git merge --ff-only #{project.release_branch}
   git push
 MESSAGE

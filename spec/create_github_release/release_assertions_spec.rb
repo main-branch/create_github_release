@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe CreateGithubRelease::ReleaseAssertions do
-  let(:release_assertions) { described_class.new(options) }
-  let(:options) { CreateGithubRelease::Options.new { |o| o.release_type = 'major' } }
+  let(:release_assertions) { described_class.new(project) }
+  let(:project) { CreateGithubRelease::Project.new(options) }
+  let(:options) { CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' } }
 
   describe '#make_assertions' do
     subject { release_assertions.make_assertions }
@@ -18,7 +19,7 @@ RSpec.describe CreateGithubRelease::ReleaseAssertions do
       @assertions_called = assertions_called
       assertions.each do |assertion|
         assertion_class = CreateGithubRelease::Assertions.const_get(assertion)
-        expect(assertion_class).to receive(:new).with(options) do |_options|
+        expect(assertion_class).to receive(:new).with(project) do |_project|
           Class.new do
             @assertion = assertion
             @assertions_called = assertions_called

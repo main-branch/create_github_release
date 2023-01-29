@@ -1,15 +1,31 @@
 # frozen_string_literal: true
 
 RSpec.describe CreateGithubRelease::Changelog do
-  let(:changelog) { described_class.new(existing_changelog, release) }
-  let(:release) { Object.new }
+  let(:changelog) { described_class.new(existing_changelog, next_release_description) }
+
+  let(:next_release_description) { <<~RELEASE_DESCRIPTION }
+    ## v1.0.0 (2022-11-08)
+
+    [Full Changelog](https://github.com/ruby-git/ruby-git/compare/v0.1.0..v1.0.0)
+
+    * f5e69d6 Release v1.0.0 (#12)
+    * 8fe479b Update documentation for initial GA release (#9)
+    * 453c8bd Correctly handle file not existing (#5)
+  RELEASE_DESCRIPTION
 
   describe '#initialize' do
     subject { changelog }
 
     let(:existing_changelog) { 'Changelog' }
 
-    it { is_expected.to have_attributes(existing_changelog: existing_changelog, new_release: release) }
+    it do
+      is_expected.to(
+        have_attributes(
+          existing_changelog: existing_changelog,
+          next_release_description: next_release_description
+        )
+      )
+    end
   end
 
   describe '#front_matter' do
@@ -175,16 +191,6 @@ RSpec.describe CreateGithubRelease::Changelog do
       * 43739A3 Initial commit
     CHANGELOG
 
-    let(:release) { CreateGithubRelease::Release.new(release_tag, release_date, release_description) }
-
-    let(:release_tag) { 'v1.0.0' }
-    let(:release_date) { Date.parse('2022-11-08') }
-    let(:release_description) { <<~RELEASE_DESCRIPTION }
-      * f5e69d6 Release v1.0.0 (#12)
-      * 8fe479b Update documentation for initial GA release (#9)
-      * 453c8bd Correctly handle file not existing (#5)
-    RELEASE_DESCRIPTION
-
     let(:expected_to_s) { <<~CHANGELOG }
       # Changelog
 
@@ -194,6 +200,8 @@ RSpec.describe CreateGithubRelease::Changelog do
       and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
       ## v1.0.0 (2022-11-08)
+
+      [Full Changelog](https://github.com/ruby-git/ruby-git/compare/v0.1.0..v1.0.0)
 
       * f5e69d6 Release v1.0.0 (#12)
       * 8fe479b Update documentation for initial GA release (#9)

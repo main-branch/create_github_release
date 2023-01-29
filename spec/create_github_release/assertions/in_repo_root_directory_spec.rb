@@ -3,8 +3,9 @@
 require 'fileutils'
 
 RSpec.describe CreateGithubRelease::Assertions::InRepoRootDirectory do
-  let(:assertion) { described_class.new(options) }
-  let(:options) { CreateGithubRelease::Options.new { |o| o.release_type = 'major' } }
+  let(:assertion) { described_class.new(project) }
+  let(:options) { CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' } }
+  let(:project) { CreateGithubRelease::Project.new(options) }
 
   before do
     allow(assertion).to receive(:`).with(String) { |command| execute_mocked_command(mocked_commands, command) }
