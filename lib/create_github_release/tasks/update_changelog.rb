@@ -2,7 +2,6 @@
 
 require 'date'
 require 'English'
-require 'create_github_release/release'
 require 'create_github_release/task_base'
 
 module CreateGithubRelease
