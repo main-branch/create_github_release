@@ -5,18 +5,18 @@ require 'create_github_release/assertion_base'
 
 module CreateGithubRelease
   module Assertions
-    # Assert that docker is running
+    # Assert that the release tag does not exist in the local repository
     #
     # @api public
     #
-    class DockerIsRunning < AssertionBase
-      # Make sure that docker is running
+    class LastReleaseTagExists < AssertionBase
+      # Assert that the last release tag exists in the local repository
       #
       # @example
       #   require 'create_github_release'
       #
       #   options = CreateGithubRelease::Options.new { |o| o.release_type = 'major' }
-      #   assertion = CreateGithubRelease::Assertions::DockerIsRunning.new(options)
+      #   assertion = CreateGithubRelease::Assertions::LastReleaseTagExists.new(options)
       #   begin
       #     assertion.assert
       #     puts 'Assertion passed'
@@ -29,12 +29,15 @@ module CreateGithubRelease
       # @raise [SystemExit] if the assertion fails
       #
       def assert
-        print 'Checking that docker is installed and running...'
-        `docker info > /dev/null 2>&1`
-        if $CHILD_STATUS.success?
-          puts 'OK'
+        print "Checking that last release tag '#{project.last_release_tag}' exists..."
+
+        tags = `git tag --list "#{project.last_release_tag}"`.chomp
+        error 'Could not list tags' unless $CHILD_STATUS.success?
+
+        if tags == ''
+          error "Last release tag '#{project.last_release_tag}' does not exist"
         else
-          error 'Docker is not installed or not running'
+          puts 'OK'
         end
       end
     end

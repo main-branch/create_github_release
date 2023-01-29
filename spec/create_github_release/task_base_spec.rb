@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe CreateGithubRelease::TaskBase do
-  let(:task) { described_class.new(options) }
-  let(:options) { CreateGithubRelease::Options.new { |o| o.release_type = 'major' } }
+  let(:task) { described_class.new(project) }
+  let(:options) { CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' } }
+  let(:project) { CreateGithubRelease::Project.new(options) }
 
   describe '#run' do
     subject { task.run }
@@ -11,8 +12,20 @@ RSpec.describe CreateGithubRelease::TaskBase do
     end
   end
 
-  describe '#options' do
-    subject { task.options }
-    it { is_expected.to eq(options) }
+  describe '#project' do
+    subject { task.project }
+    it { is_expected.to eq(project) }
+  end
+
+  describe '#backtick_debug?' do
+    subject { task.send('backtick_debug?') }
+    context 'when project.verbose? is true' do
+      before { project.verbose = true }
+      it { is_expected.to eq(true) }
+    end
+    context 'when project.#verbose? is false' do
+      before { project.verbose = false }
+      it { is_expected.to eq(false) }
+    end
   end
 end

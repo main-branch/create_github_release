@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
 RSpec.describe CreateGithubRelease::Tasks::UpdateVersion do
-  let(:task) { described_class.new(options) }
-  let(:options) { CreateGithubRelease::Options.new { |o| o.release_type = 'major' } }
+  let(:task) { described_class.new(project) }
+  let(:project) { CreateGithubRelease::Project.new(options) }
+  let(:options) { CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' } }
 
   let(:version_file) { 'lib/my_gem/version.rb' }
 
   before do
     allow(task).to receive(:`).with(String) { |command| execute_mocked_command(mocked_commands, command) }
+    allow(project).to receive(:`).with(String) { |command| execute_mocked_command(mocked_commands, command) }
   end
 
   describe '#run' do

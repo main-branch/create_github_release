@@ -15,8 +15,9 @@ module CreateGithubRelease
       # @example
       #   require 'create_github_release'
       #
-      #   options = CreateGithubRelease::Options.new { |o| o.release_type = 'major' }
-      #   task = CreateGithubRelease::Tasks::CommitRelease.new(options)
+      #   options = CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' }
+      #   project = CreateGithubRelease::Project.new(options)
+      #   task = CreateGithubRelease::Tasks::CommitRelease.new(project)
       #   begin
       #     task.run
       #     puts 'Task completed successfully'
@@ -30,7 +31,7 @@ module CreateGithubRelease
       #
       def run
         print 'Making release commit...'
-        `git commit -s -m 'Release #{options.tag}'`
+        `git commit -s -m 'Release #{project.next_release_tag}'`
         if $CHILD_STATUS.success?
           puts 'OK'
         else

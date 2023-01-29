@@ -15,8 +15,9 @@ module CreateGithubRelease
       # @example
       #   require 'create_github_release'
       #
-      #   options = CreateGithubRelease::Options.new { |o| o.release_type = 'major' }
-      #   task = CreateGithubRelease::Tasks::CreateReleaseTag.new(options)
+      #   options = CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' }
+      #   project = CreateGithubRelease::Project.new(options)
+      #   task = CreateGithubRelease::Tasks::CreateReleaseTag.new(project)
       #   begin
       #     task.run
       #     puts 'Task completed successfully'
@@ -29,12 +30,12 @@ module CreateGithubRelease
       # @raise [SystemExit] if the task fails
       #
       def run
-        print "Creating tag '#{options.tag}'..."
-        `git tag '#{options.tag}'`
+        print "Creating tag '#{project.next_release_tag}'..."
+        `git tag '#{project.next_release_tag}'`
         if $CHILD_STATUS.success?
           puts 'OK'
         else
-          error "Could not create tag '#{options.tag}'"
+          error "Could not create tag '#{project.next_release_tag}'"
         end
       end
     end

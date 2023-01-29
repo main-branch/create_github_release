@@ -55,12 +55,11 @@ module CreateGithubRelease
       CreateGithubRelease::Assertions::NoUncommittedChanges,
       CreateGithubRelease::Assertions::NoStagedChanges,
       CreateGithubRelease::Assertions::LocalAndRemoteOnSameCommit,
+      CreateGithubRelease::Assertions::LastReleaseTagExists,
       CreateGithubRelease::Assertions::LocalReleaseTagDoesNotExist,
       CreateGithubRelease::Assertions::RemoteReleaseTagDoesNotExist,
       CreateGithubRelease::Assertions::LocalReleaseBranchDoesNotExist,
       CreateGithubRelease::Assertions::RemoteReleaseBranchDoesNotExist,
-      CreateGithubRelease::Assertions::DockerIsRunning,
-      CreateGithubRelease::Assertions::ChangelogDockerContainerExists,
       CreateGithubRelease::Assertions::GhCommandExists
     ].freeze
 

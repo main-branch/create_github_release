@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
+require 'create_github_release/backtick_debug'
+require 'create_github_release/command_line_options'
 require 'create_github_release/command_line_parser'
+require 'create_github_release/project'
 
+require 'create_github_release/change'
 require 'create_github_release/changelog'
-require 'create_github_release/options'
-require 'create_github_release/release'
 
 require 'create_github_release/assertion_base'
 require 'create_github_release/assertions'

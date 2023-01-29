@@ -15,8 +15,9 @@ module CreateGithubRelease
       # @example
       #   require 'create_github_release'
       #
-      #   options = CreateGithubRelease::Options.new { |o| o.release_type = 'major' }
-      #   task = CreateGithubRelease::Tasks::PushRelease.new(options)
+      #   options = CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' }
+      #   project = CreateGithubRelease::Project.new(options)
+      #   task = CreateGithubRelease::Tasks::PushRelease.new(project)
       #   begin
       #     task.run
       #     puts 'Task completed successfully'
@@ -29,8 +30,8 @@ module CreateGithubRelease
       # @raise [SystemExit] if the task fails
       #
       def run
-        print "Pushing branch '#{options.branch}' to remote..."
-        `git push --tags --set-upstream '#{options.remote}' '#{options.branch}' > /dev/null 2>&1`
+        print "Pushing branch '#{project.release_branch}' to remote..."
+        `git push --tags --set-upstream '#{project.remote}' '#{project.release_branch}' > /dev/null 2>&1`
         if $CHILD_STATUS.success?
           puts 'OK'
         else

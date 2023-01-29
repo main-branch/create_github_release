@@ -1,11 +1,21 @@
 # frozen_string_literal: true
 
 RSpec.describe CreateGithubRelease::Tasks::CreateReleaseBranch do
-  let(:task) { described_class.new(options) }
-  let(:options) { CreateGithubRelease::Options.new { |o| o.release_type = 'major' } }
+  let(:task) { described_class.new(project) }
+
+  let(:release_branch) { 'release-v1.0.0' }
+
+  let(:project) do
+    CreateGithubRelease::Project.new(options) do |p|
+      p.release_branch = release_branch
+    end
+  end
+
+  let(:options) { CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' } }
 
   before do
     allow(task).to receive(:`).with(String) { |command| execute_mocked_command(mocked_commands, command) }
+    allow(project).to receive(:`).with(String) { |command| execute_mocked_command(mocked_commands, command) }
   end
 
   describe '#run' do
@@ -18,7 +28,7 @@ RSpec.describe CreateGithubRelease::Tasks::CreateReleaseBranch do
 
     let(:mocked_commands) do
       [
-        MockedCommand.new("git checkout -b 'release-v1.0.0' > /dev/null 2>&1", exitstatus: git_exitstatus)
+        MockedCommand.new("git checkout -b '#{release_branch}' > /dev/null 2>&1", exitstatus: git_exitstatus)
       ]
     end
 
@@ -33,7 +43,7 @@ RSpec.describe CreateGithubRelease::Tasks::CreateReleaseBranch do
       let(:git_exitstatus) { 1 }
       it 'should fail' do
         expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to start_with("ERROR: Could not create branch 'release-v1.0.0'")
+        expect(stderr).to start_with("ERROR: Could not create branch '#{release_branch}'")
       end
     end
   end

@@ -1,11 +1,23 @@
 # frozen_string_literal: true
 
 RSpec.describe CreateGithubRelease::Tasks::PushRelease do
-  let(:task) { described_class.new(options) }
-  let(:options) { CreateGithubRelease::Options.new { |o| o.release_type = 'major' } }
+  let(:task) { described_class.new(project) }
+
+  let(:release_branch) { 'release-v1.0.0' }
+  let(:remote) { 'upstream' }
+
+  let(:project) do
+    CreateGithubRelease::Project.new(options) do |p|
+      p.release_branch = release_branch
+      p.remote = remote
+    end
+  end
+
+  let(:options) { CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' } }
 
   before do
     allow(task).to receive(:`).with(String) { |command| execute_mocked_command(mocked_commands, command) }
+    allow(project).to receive(:`).with(String) { |command| execute_mocked_command(mocked_commands, command) }
   end
 
   describe '#run' do
@@ -19,7 +31,7 @@ RSpec.describe CreateGithubRelease::Tasks::PushRelease do
     let(:mocked_commands) do
       [
         MockedCommand.new(
-          "git push --tags --set-upstream 'origin' 'release-v1.0.0' > /dev/null 2>&1'",
+          "git push --tags --set-upstream '#{remote}' '#{release_branch}' > /dev/null 2>&1",
           exitstatus: git_exitstatus
         )
       ]

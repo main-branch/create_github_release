@@ -1,11 +1,21 @@
 # frozen_string_literal: true
 
 RSpec.describe CreateGithubRelease::Tasks::CommitRelease do
-  let(:task) { described_class.new(options) }
-  let(:options) { CreateGithubRelease::Options.new { |o| o.release_type = 'major' } }
+  let(:task) { described_class.new(project) }
+
+  let(:next_release_tag) { 'v1.0.0' }
+
+  let(:project) do
+    CreateGithubRelease::Project.new(options) do |p|
+      p.next_release_tag = next_release_tag
+    end
+  end
+
+  let(:options) { CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' } }
 
   before do
     allow(task).to receive(:`).with(String) { |command| execute_mocked_command(mocked_commands, command) }
+    allow(project).to receive(:`).with(String) { |command| execute_mocked_command(mocked_commands, command) }
   end
 
   describe '#run' do
@@ -18,7 +28,7 @@ RSpec.describe CreateGithubRelease::Tasks::CommitRelease do
 
     let(:mocked_commands) do
       [
-        MockedCommand.new("git commit -s -m 'Release v1.0.0'", exitstatus: git_exitstatus)
+        MockedCommand.new("git commit -s -m 'Release #{next_release_tag}'", exitstatus: git_exitstatus)
       ]
     end
 

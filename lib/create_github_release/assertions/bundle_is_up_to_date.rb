@@ -5,7 +5,7 @@ require 'create_github_release/assertion_base'
 
 module CreateGithubRelease
   module Assertions
-    # Assert that options.branch does not exist
+    # Assert that project.release+branch does not exist
     #
     # Checks both the local repository and the remote repository.
     #
@@ -17,8 +17,9 @@ module CreateGithubRelease
       # @example
       #   require 'create_github_release'
       #
-      #   options = CreateGithubRelease::Options.new { |o| o.release_type = 'major' }
-      #   assertion = CreateGithubRelease::Assertions::BundleIsUpToDate.new(options)
+      #   options = CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' }
+      #   project = CreateGithubRelease::Project.new(options)
+      #   assertion = CreateGithubRelease::Assertions::BundleIsUpToDate.new(project)
       #   begin
       #     assertion.assert
       #     puts 'Assertion passed'

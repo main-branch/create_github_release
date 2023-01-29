@@ -15,8 +15,9 @@ module CreateGithubRelease
       # @example
       #   require 'create_github_release'
       #
-      #   options = CreateGithubRelease::Options.new { |o| o.release_type = 'major' }
-      #   task = CreateGithubRelease::Tasks::CreateReleaseBranch.new(options)
+      #   options = CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' }
+      #   project = CreateGithubRelease::Project.new(options)
+      #   task = CreateGithubRelease::Tasks::CreateReleaseBranch.new(project)
       #   begin
       #     task.run
       #     puts 'Task completed successfully'
@@ -29,12 +30,12 @@ module CreateGithubRelease
       # @raise [SystemExit] if the task fails
       #
       def run
-        print "Creating branch '#{options.branch}'..."
-        `git checkout -b '#{options.branch}' > /dev/null 2>&1`
+        print "Creating branch '#{project.release_branch}'..."
+        `git checkout -b '#{project.release_branch}' > /dev/null 2>&1`
         if $CHILD_STATUS.success?
           puts 'OK'
         else
-          error "Could not create branch '#{options.branch}'" unless $CHILD_STATUS.success?
+          error "Could not create branch '#{project.release_branch}'" unless $CHILD_STATUS.success?
         end
       end
     end

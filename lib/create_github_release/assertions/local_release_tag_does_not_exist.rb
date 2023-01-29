@@ -29,15 +29,15 @@ module CreateGithubRelease
       # @raise [SystemExit] if the assertion fails
       #
       def assert
-        print "Checking that local tag '#{options.tag}' does not exist..."
+        print "Checking that local tag '#{project.next_release_tag}' does not exist..."
 
-        tags = `git tag --list "#{options.tag}"`.chomp
+        tags = `git tag --list "#{project.next_release_tag}"`.chomp
         error 'Could not list tags' unless $CHILD_STATUS.success?
 
         if tags == ''
           puts 'OK'
         else
-          error "Local tag '#{options.tag}' already exists"
+          error "Local tag '#{project.next_release_tag}' already exists"
         end
       end
     end

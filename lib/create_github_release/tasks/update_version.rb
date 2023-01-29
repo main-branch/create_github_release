@@ -15,8 +15,9 @@ module CreateGithubRelease
       # @example
       #   require 'create_github_release'
       #
-      #   options = CreateGithubRelease::Options.new { |o| o.release_type = 'major' }
-      #   task = CreateGithubRelease::Tasks::UpdateVersion.new(options)
+      #   options = CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' }
+      #   project = CreateGithubRelease::Project.new(options)
+      #   task = CreateGithubRelease::Tasks::UpdateVersion.new(project)
       #   begin
       #     task.run
       #     puts 'Task completed successfully'
@@ -30,7 +31,7 @@ module CreateGithubRelease
       #
       def run
         print 'Updating version...'
-        message, result = Bump::Bump.run(options.release_type, commit: false)
+        message, result = Bump::Bump.run(project.release_type, commit: false)
         error "Could not bump version: #{message}" unless result.zero?
 
         version_file = Bump::Bump.file
