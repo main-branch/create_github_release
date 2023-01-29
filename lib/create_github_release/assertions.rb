@@ -9,6 +9,7 @@ module CreateGithubRelease
 end
 
 require_relative 'assertions/bundle_is_up_to_date'
+require_relative 'assertions/gh_authenticated'
 require_relative 'assertions/gh_command_exists'
 require_relative 'assertions/git_command_exists'
 require_relative 'assertions/in_git_repo'
