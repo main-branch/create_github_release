@@ -339,19 +339,27 @@ module CreateGithubRelease
     # @return [Boolean]
     # @api private
     def validate_changelog_path
-      return true if changelog_path.nil?
+      changelog_path.nil? || (changelog_path_valid? && changelog_regular_file?)
+    end
 
-      unless valid_path?(changelog_path)
-        @errors << "--changelog-path='#{changelog_path}' is not valid"
-        return false
-      end
+    # `true` if `#changelog_path` is a valid path
+    # @return [Boolean]
+    # @api private
+    def changelog_path_valid?
+      return true if valid_path?(changelog_path)
 
-      if File.exist?(changelog_path) && !File.file?(changelog_path)
-        @errors << "--changelog-path='#{changelog_path}' must be a regular file"
-        return false
-      end
+      @errors << "--changelog-path='#{changelog_path}' is not valid"
+      false
+    end
 
-      true
+    # `true` if `#changelog_path` does not exist OR if it exists and is a regular file
+    # @return [Boolean]
+    # @api private
+    def changelog_regular_file?
+      return true unless File.exist?(changelog_path) && !File.file?(changelog_path)
+
+      @errors << "--changelog-path='#{changelog_path}' must be a regular file"
+      false
     end
   end
   # rubocop:enable Metrics/ClassLength
