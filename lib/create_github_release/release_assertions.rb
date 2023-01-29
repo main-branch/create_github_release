@@ -60,7 +60,8 @@ module CreateGithubRelease
       CreateGithubRelease::Assertions::RemoteReleaseTagDoesNotExist,
       CreateGithubRelease::Assertions::LocalReleaseBranchDoesNotExist,
       CreateGithubRelease::Assertions::RemoteReleaseBranchDoesNotExist,
-      CreateGithubRelease::Assertions::GhCommandExists
+      CreateGithubRelease::Assertions::GhCommandExists,
+      CreateGithubRelease::Assertions::GhAuthenticated
     ].freeze
 
     # Run all assertions
