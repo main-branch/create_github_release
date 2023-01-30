@@ -578,6 +578,8 @@ module CreateGithubRelease
 
         [Full Changelog](#{release_log_url})
 
+        Changes since #{last_release_tag}:
+
         #{list_of_changes}
       DESCRIPTION
     end
@@ -762,6 +764,8 @@ module CreateGithubRelease
     # @return [String] The list of changes in the release as a string
     # @api private
     def list_of_changes
+      return '* No changes' if changes.empty?
+
       changes.map do |change|
         "* #{change.sha} #{change.subject}"
       end.join("\n")

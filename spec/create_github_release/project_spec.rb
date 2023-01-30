@@ -506,8 +506,34 @@ RSpec.describe CreateGithubRelease::Project do
 
           [Full Changelog](https://github.com/username/repo/compare/v0.1.0..v1.0.0)
 
+          Changes since v0.1.0:
+
           * e718690 Release v1.0.0 (#3)
           * ab598f3 Fix Rubocop offenses (#2)
+        NEXT_RELEASE_DESCRIPTION
+      end
+
+      it { is_expected.to eq(expected_next_release_description) }
+    end
+
+    context 'when there are no changes' do
+      before do
+        project.remote_url = URI.parse('https://github.com/username/repo')
+        project.last_release_tag = 'v0.1.0'
+        project.next_release_tag = 'v1.0.0'
+        project.next_release_date = Date.new(2022, 11, 7)
+        project.changes = []
+      end
+
+      let(:expected_next_release_description) do
+        <<~NEXT_RELEASE_DESCRIPTION
+          ## v1.0.0 (2022-11-07)
+
+          [Full Changelog](https://github.com/username/repo/compare/v0.1.0..v1.0.0)
+
+          Changes since v0.1.0:
+
+          * No changes
         NEXT_RELEASE_DESCRIPTION
       end
 
