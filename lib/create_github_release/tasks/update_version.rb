@@ -30,11 +30,38 @@ module CreateGithubRelease
       # @raise [SystemExit] if the task fails
       #
       def run
-        print 'Updating version...'
-        message, result = Bump::Bump.run(project.release_type, commit: false)
-        error "Could not bump version: #{message}" unless result.zero?
+        return if project.first_release?
 
-        version_file = Bump::Bump.file
+        print 'Updating version...'
+        bump_version
+        stage_version_file
+      end
+
+      private
+
+      # Update the version using bump
+      # @return [void]
+      # @api private
+      def bump_version
+        `bump #{project.release_type} --no-commit`
+        error 'Could not bump version' unless $CHILD_STATUS.success?
+      end
+
+      # Return the path the the version file using bump
+      # @return [String]
+      # @api private
+      def bump_version_file
+        output = `bump file`
+        error 'Bump could determine the version file' unless $CHILD_STATUS.success?
+
+        output.lines.last.chomp
+      end
+
+      # Identify the version file using bump and stage the change to it
+      # @return [void]
+      # @api private
+      def stage_version_file
+        version_file = bump_version_file
         `git add "#{version_file}"`
         if $CHILD_STATUS.success?
           puts 'OK'

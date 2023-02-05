@@ -29,6 +29,8 @@ module CreateGithubRelease
       # @raise [SystemExit] if the assertion fails
       #
       def assert
+        return if project.first_release?
+
         print "Checking that last release tag '#{project.last_release_tag}' exists..."
 
         tags = `git tag --list "#{project.last_release_tag}"`.chomp

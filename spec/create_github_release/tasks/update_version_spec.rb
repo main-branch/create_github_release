@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe CreateGithubRelease::Tasks::UpdateVersion do
+  let(:release_type) { 'major' }
   let(:task) { described_class.new(project) }
   let(:project) { CreateGithubRelease::Project.new(options) }
-  let(:options) { CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' } }
+  let(:options) { CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = release_type } }
 
   let(:version_file) { 'lib/my_gem/version.rb' }
 
@@ -20,39 +21,55 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateVersion do
     let(:stdout) { @stdout }
     let(:stderr) { @stderr }
 
-    before do
-      allow(Bump::Bump).to receive(:run).with('major', commit: false).and_return(['next.version', bump_result])
-      allow(Bump::Bump).to receive(:file).with(no_args).and_return(version_file)
+    context 'when this is the first release' do
+      let(:release_type) { 'first' }
+      it 'should not bump the version' do
+        expect(task).not_to receive(:bump_version)
+        subject
+      end
     end
 
-    let(:mocked_commands) do
-      [
-        MockedCommand.new("git add \"#{version_file}\"", exitstatus: git_exitstatus)
-      ]
-    end
+    context 'when this is NOT the first release' do
+      let(:mocked_commands) do
+        [
+          MockedCommand.new('bump major --no-commit', exitstatus: bump_exitstatus),
+          MockedCommand.new('bump file', stdout: "#{version_file}\n", exitstatus: bump_file_exitstatus),
+          MockedCommand.new("git add \"#{version_file}\"", exitstatus: git_exitstatus)
+        ]
+      end
 
-    context 'when Bump and git add succeed' do
-      let(:bump_result) { 0 }
+      let(:bump_exitstatus) { 0 }
+      let(:bump_file_exitstatus) { 0 }
       let(:git_exitstatus) { 0 }
-      it 'should succeed' do
-        expect { subject }.not_to raise_error
-      end
-    end
 
-    context 'when Bump fails' do
-      let(:bump_result) { 1 }
-      it 'should fail' do
-        expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to start_with('ERROR: Could not bump version')
+      context 'when bump and git add succeed' do
+        it 'should succeed' do
+          expect { subject }.not_to raise_error
+        end
       end
-    end
 
-    context 'when git add fails' do
-      let(:bump_result) { 0 }
-      let(:git_exitstatus) { 1 }
-      it 'should fail' do
-        expect { subject }.to raise_error(SystemExit)
-        expect(stderr).to start_with("ERROR: Could not stage changes to #{version_file}")
+      context 'when bump fails to increment the version' do
+        let(:bump_exitstatus) { 1 }
+        it 'should fail' do
+          expect { subject }.to raise_error(SystemExit)
+          expect(stderr).to start_with('ERROR: Could not bump version')
+        end
+      end
+
+      context 'when bump file fails' do
+        let(:bump_file_exitstatus) { 1 }
+        it 'should fail' do
+          expect { subject }.to raise_error(SystemExit)
+          expect(stderr).to start_with('ERROR: Bump could determine the version file')
+        end
+      end
+
+      context 'when git add fails' do
+        let(:git_exitstatus) { 1 }
+        it 'should fail' do
+          expect { subject }.to raise_error(SystemExit)
+          expect(stderr).to start_with("ERROR: Could not stage changes to #{version_file}")
+        end
       end
     end
   end
