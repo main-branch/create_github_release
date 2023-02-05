@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.0.0 (2023-02-05)
+
+[Full Changelog](https://github.com/main-branch/create_github_release/compare/v0.3.0..v1.0.0)
+
+Changes since v0.3.0:
+
+* bfd40e6 Handle the first release of a gem (#32)
+* 7a76148 Release v0.3.0 (#31)
+
 ## v0.3.0 (2023-01-29)
 
 [Full Changelog](https://github.com/main-branch/create_github_release/compare/v0.2.1..v0.3.0)
