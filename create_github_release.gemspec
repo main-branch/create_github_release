@@ -8,8 +8,11 @@ Gem::Specification.new do |spec|
   spec.authors = ['James']
   spec.email = ['jcouball@yahoo.com']
 
-  spec.summary = 'Create a GitHub release PR for a Ruby Gem'
-  spec.description = spec.summary
+  spec.summary = 'A script to create a GitHub release for a Ruby Gem'
+  spec.description = <<~DESCRIPTION
+    A script that manages your gem version and creates a GitHub branch, PR, and
+    release for a new gem version.
+  DESCRIPTION
   spec.homepage = 'https://github.com/main-branch/create_github_release'
   spec.license = 'MIT'
   spec.required_ruby_version = '>= 2.7.0'

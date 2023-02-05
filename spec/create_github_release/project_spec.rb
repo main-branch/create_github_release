@@ -4,35 +4,62 @@ require 'tmpdir'
 require 'timecop'
 
 RSpec.describe CreateGithubRelease::Project do
-  let(:project) { described_class.new(options) }
-  let(:options) { CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' } }
+  let(:release_type) { 'major' }
+  let(:project) { described_class.new(options, &project_init_block) }
+  let(:project_init_block) { nil }
+  let(:options) { CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = release_type } }
 
   before do
-    allow(project).to receive(:`).with(String) { |command| execute_mocked_command(mocked_commands, command) }
+    allow_any_instance_of(described_class).to receive(:`).with(String) do |_object, command|
+      execute_mocked_command(mocked_commands, command)
+    end
   end
 
   let(:mocked_commands) { [] }
 
   describe '#initialize' do
+    subject { project }
+
     context '#without a block' do
       it 'should successfully create a project' do
-        expect(described_class.new(options)).to be_a(described_class)
+        expect(subject).to be_a(described_class)
       end
       it 'should set the options attribute' do
-        expect(described_class.new(options).options).to eq(options)
+        expect(subject.options).to eq(options)
       end
     end
 
     context '#with a block' do
-      subject do
-        described_class.new(options) { |project| project.release_type = 'minor' }
-      end
+      let(:project_init_block) { ->(p) { p.release_type = 'minor' } }
 
       it 'should call the block with the project as an argument' do
         expect(subject.release_type).to eq('minor')
       end
     end
+
+    context "when release_type is 'first' and 'bump current' returns 0.0.1" do
+      let(:release_type) { 'first' }
+
+      subject { project }
+
+      let(:mocked_commands) { [MockedCommand.new('bump current', stdout: "0.0.1\n")] }
+
+      it do
+        is_expected.to(
+          have_attributes(
+            first_release: true,
+            last_release_version: '',
+            last_release_tag: '',
+            next_release_version: '0.0.1',
+            next_release_tag: 'v0.0.1'
+          )
+        )
+      end
+    end
   end
+
+  # describe '#first_release?' do
+  # end
 
   describe '#default_branch' do
     subject { project.default_branch }
@@ -73,10 +100,8 @@ RSpec.describe CreateGithubRelease::Project do
     end
 
     context 'when default_branch is explicitly set' do
-      before { project.default_branch = 'production' }
-      it 'should return the explicitly set default_branch' do
-        expect(subject).to eq('production')
-      end
+      let(:project_init_block) { ->(p) { p.default_branch = 'production' } }
+      it { is_expected.to eq('production') }
     end
   end
 
@@ -84,13 +109,13 @@ RSpec.describe CreateGithubRelease::Project do
     subject { project.next_release_tag }
 
     context 'when next_release_tag is explicitly set with next_release_tag=' do
-      before { project.next_release_tag = 'v1.2.3' }
+      let(:project_init_block) { ->(p) { p.next_release_tag = 'v1.2.3' } }
       it { is_expected.to eq('v1.2.3') }
     end
 
     context 'when next_release_tag is not explicitly set' do
       context 'when the next_release_version is 1.0.0' do
-        before { project.next_release_version = '1.0.0' }
+        let(:project_init_block) { ->(p) { p.next_release_version = '1.0.0' } }
         it { is_expected.to eq('v1.0.0') }
       end
     end
@@ -103,14 +128,14 @@ RSpec.describe CreateGithubRelease::Project do
     # before { Timecop.freeze(Date.parse(next_release_date)) }
 
     context 'when next_release_date is explicitly set with next_release_date=' do
-      before { project.next_release_date = next_release_date }
+      let(:project_init_block) { ->(p) { p.next_release_date = next_release_date } }
       it { is_expected.to eq(next_release_date) }
     end
 
     context 'when next_release_date is not explicitly set' do
       context 'when next release tag is v1.0.0' do
         let(:next_release_tag) { 'v1.0.0' }
-        before { project.next_release_tag = next_release_tag }
+        let(:project_init_block) { ->(p) { p.next_release_tag = next_release_tag } }
         context 'when tag v1.0.0 exists' do
           context 'when the git tag command fails' do
             let(:mocked_commands) do
@@ -163,16 +188,24 @@ RSpec.describe CreateGithubRelease::Project do
     subject { project.next_release_version }
 
     context 'when next_release_version is explicitly set with next_release_version=' do
-      before { project.next_release_version = '1.2.3' }
+      let(:project_init_block) { ->(p) { p.next_release_version = '1.2.3' } }
       it { is_expected.to eq('1.2.3') }
     end
 
     context 'when next_release_version is set in options' do
-      before { options.next_release_version = '1.2.3' }
+      let(:project_init_block) { ->(p) { p.next_release_version = '1.2.3' } }
       it { is_expected.to eq('1.2.3') }
     end
 
     context 'when not otherwise specified' do
+      context 'when this is the first release' do
+        let(:release_type) { 'first' }
+        let(:mocked_commands) { [MockedCommand.new('bump current', stdout: "1.0.0\n")] }
+        it "should determine the version using 'bump current'" do
+          expect(subject).to eq('1.0.0')
+        end
+      end
+
       context 'when the bump command succeeds' do
         let(:mocked_commands) { [MockedCommand.new('bump show-next major', stdout: "1.0.0\n")] }
         it { is_expected.to eq('1.0.0') }
@@ -200,13 +233,21 @@ RSpec.describe CreateGithubRelease::Project do
     subject { project.last_release_tag }
 
     context 'when last_release_tag is explicitly set with next_release_tag=' do
-      before { project.last_release_tag = 'v0.1.0' }
+      let(:project_init_block) { ->(p) { p.last_release_tag = 'v0.1.0' } }
       it { is_expected.to eq('v0.1.0') }
     end
 
     context 'when last_release_tag is not explicitly set' do
+      context 'when this is the first release' do
+        let(:release_type) { 'first' }
+        let(:project_init_block) { ->(p) { p.next_release_version = '0.0.1' } }
+        it 'should be an empty string' do
+          expect(subject).to eq('')
+        end
+      end
+
       context 'when the last_release_version is 0.0.1' do
-        before { project.last_release_version = '0.0.1' }
+        let(:project_init_block) { ->(p) { p.last_release_version = '0.0.1' } }
         it { is_expected.to eq('v0.0.1') }
       end
     end
@@ -215,7 +256,7 @@ RSpec.describe CreateGithubRelease::Project do
   describe '#last_release_version' do
     subject { project.last_release_version }
     context 'when last_release_version is explicitly set with last_release_version=' do
-      before { project.last_release_version = '1.2.3' }
+      let(:project_init_block) { ->(p) { p.last_release_version = '1.2.3' } }
       it { is_expected.to eq('1.2.3') }
     end
 
@@ -225,6 +266,26 @@ RSpec.describe CreateGithubRelease::Project do
     end
 
     context 'when not otherwise specified' do
+      context 'when this is the first release' do
+        let(:project_init_block) do
+          lambda do |p|
+            p.release_type = 'first'
+            p.next_release_version = '0.0.1'
+          end
+        end
+        it 'should return an empty string' do
+          expect(subject).to eq('')
+        end
+      end
+
+      context 'when this is the first release' do
+        let(:release_type) { 'first' }
+        let(:mocked_commands) { [MockedCommand.new('bump current', stdout: '0.0.1')] }
+        it 'should return an empty string' do
+          expect(subject).to eq('')
+        end
+      end
+
       context 'when the bump command succeeds' do
         let(:mocked_commands) { [MockedCommand.new('bump current', stdout: "0.0.1\n")] }
         it { is_expected.to eq('0.0.1') }
@@ -252,7 +313,7 @@ RSpec.describe CreateGithubRelease::Project do
     subject { project.release_branch }
 
     context 'when release_branch is explicitly set with release_branch=' do
-      before { project.release_branch = 'release-v1.1.1' }
+      let(:project_init_block) { ->(p) { p.release_branch = 'release-v1.1.1' } }
       it { is_expected.to eq('release-v1.1.1') }
     end
 
@@ -263,7 +324,7 @@ RSpec.describe CreateGithubRelease::Project do
 
     context 'when release_branch is not explicitly set' do
       context 'when the next_release_tag is v1.0.0' do
-        before { project.next_release_tag = 'v1.0.0' }
+        let(:project_init_block) { ->(p) { p.next_release_tag = 'v1.0.0' } }
         it { is_expected.to eq('release-v1.0.0') }
       end
     end
@@ -274,17 +335,35 @@ RSpec.describe CreateGithubRelease::Project do
 
     context 'when release_log_url is explicitly set with release_log_url=' do
       let(:release_log_url) { 'https://github.com/user/repo/compare/v0.1.0..v0.2.0' }
-      before { project.release_log_url = release_log_url }
+      let(:project_init_block) { ->(p) { p.release_log_url = release_log_url } }
       it { is_expected.to eq(release_log_url) }
     end
 
     context 'when release_log_url is not explicitly set' do
-      context "when remote_url is 'https://github.com/org/repo'" do
-        before { project.remote_url = 'https://github.com/org/repo' }
-        context "last_release_tag is 'v0.1.0', and next_release_tag is 'v1.0.0'" do
-          before do
-            project.last_release_tag = 'v0.1.0'
-            project.next_release_tag = 'v1.0.0'
+      context 'when this is the first release' do
+        context "when remote_url is 'https://github.com/org/repo', " \
+                'last_release_tag is v0.0.1, and next_release_tag is v1.0.0' do
+          let(:project_init_block) do
+            lambda do |p|
+              p.release_type = 'first'
+              p.remote_url = 'https://github.com/org/repo'
+              p.next_release_version = '0.0.1'
+              p.first_commit = '1234567'
+            end
+          end
+          it { is_expected.to eq(URI.parse('https://github.com/org/repo/compare/1234567..v0.0.1')) }
+        end
+      end
+
+      context 'when this is not the first release' do
+        context "when remote_url is 'https://github.com/org/repo', " \
+                'last_release_tag is v0.0.1, and next_release_tag is v1.0.0' do
+          let(:project_init_block) do
+            lambda do |p|
+              p.remote_url = 'https://github.com/org/repo'
+              p.last_release_tag = 'v0.1.0'
+              p.next_release_tag = 'v1.0.0'
+            end
           end
           it { is_expected.to eq(URI.parse('https://github.com/org/repo/compare/v0.1.0..v1.0.0')) }
         end
@@ -302,7 +381,7 @@ RSpec.describe CreateGithubRelease::Project do
     end
 
     context 'when the release_type is not explicitly set' do
-      before { project.release_type = 'minor' }
+      let(:project_init_block) { ->(p) { p.release_type = 'minor' } }
       it 'should return the set release type' do
         expect(subject).to eq('minor')
       end
@@ -314,17 +393,19 @@ RSpec.describe CreateGithubRelease::Project do
 
     context 'when release_url is explicitly set with release_url=' do
       let(:release_url) { 'https://github.com/user/repo/releases/tag/v1.0.0' }
-      before { project.release_url = release_url }
+      let(:project_init_block) { ->(p) { p.release_url = release_url } }
       it { is_expected.to eq(release_url) }
     end
 
     context 'when release_url is not explicitly set' do
-      context "when remote_url is 'https://github.com/user/repo'" do
-        before { project.remote_url = 'https://github.com/user/repo' }
-        context "when next_release_tag is 'v1.0.0'" do
-          before { project.next_release_tag = 'v1.0.0' }
-          it { is_expected.to eq(URI.parse('https://github.com/user/repo/releases/tag/v1.0.0')) }
+      context "when remote_url is 'https://github.com/user/repo' and next_release_tag is 'v1.0.0'" do
+        let(:project_init_block) do
+          lambda do |p|
+            p.next_release_tag = 'v1.0.0'
+            p.remote_url = 'https://github.com/user/repo'
+          end
         end
+        it { is_expected.to eq(URI.parse('https://github.com/user/repo/releases/tag/v1.0.0')) }
       end
     end
   end
@@ -346,7 +427,7 @@ RSpec.describe CreateGithubRelease::Project do
     end
 
     context 'when the remote is explicitly set' do
-      before { project.remote = 'upstream' }
+      let(:project_init_block) { ->(p) { p.remote = 'upstream' } }
       it 'should return the set remote' do
         expect(subject).to eq('upstream')
       end
@@ -358,13 +439,13 @@ RSpec.describe CreateGithubRelease::Project do
 
     context 'when remote_base_url is explicitly set with remote_base_url=' do
       let(:remote_base_url) { URI.parse('https://github.com/') }
-      before { project.remote_base_url = remote_base_url }
+      let(:project_init_block) { ->(p) { p.remote_base_url = remote_base_url } }
       it { is_expected.to eq(remote_base_url) }
     end
 
     context 'when remote_base_url is not explicitly set' do
       context "when remote_url is 'https://github.com/org/repo'" do
-        before { project.remote_url = URI.parse('https://github.com/org/repo') }
+        let(:project_init_block) { ->(p) { p.remote_url = URI.parse('https://github.com/org/repo') } }
         it { is_expected.to eq(URI.parse('https://github.com/')) }
       end
     end
@@ -375,13 +456,13 @@ RSpec.describe CreateGithubRelease::Project do
 
     context 'when remote_repository is explicitly set with remote_repository=' do
       let(:remote_repository) { 'org/repo' }
-      before { project.remote_repository = remote_repository }
+      let(:project_init_block) { ->(p) { p.remote_repository = remote_repository } }
       it { is_expected.to eq(remote_repository) }
     end
 
     context 'when remote_repository is not explicitly set' do
       context "when remote_url is 'https://github.com/org/repo'" do
-        before { project.remote_url = URI.parse('https://github.com/org/repo') }
+        let(:project_init_block) { ->(p) { p.remote_url = URI.parse('https://github.com/org/repo') } }
         it { is_expected.to eq('org/repo') }
       end
     end
@@ -392,7 +473,7 @@ RSpec.describe CreateGithubRelease::Project do
 
     context 'when the remote_url is explicity set with #remote_url=' do
       let(:remote_url) { URI.parse('https://github.com/org2/repo2') }
-      before { project.remote_url = remote_url }
+      let(:project_init_block) { ->(p) { p.remote_url = remote_url } }
       it { is_expected.to eq(remote_url) }
     end
 
@@ -430,7 +511,7 @@ RSpec.describe CreateGithubRelease::Project do
     end
 
     context 'when the changelog_path is explicitly set' do
-      before { project.changelog_path = 'docs/CHANGES.txt' }
+      let(:project_init_block) { ->(p) { p.changelog_path = 'docs/CHANGES.txt' } }
       it 'should return the set changelog_path' do
         expect(subject).to eq('docs/CHANGES.txt')
       end
@@ -440,11 +521,9 @@ RSpec.describe CreateGithubRelease::Project do
   describe '#changes' do
     subject { project.changes }
 
-    context 'when changes is not explicitly set' do
-      before do
-        project.last_release_tag = 'v0.1.0'
-      end
+    let(:project_init_block) { ->(p) { p.last_release_tag = 'v0.1.0' } }
 
+    context 'when changes is not explicitly set' do
       context 'when the git log command succeeds' do
         let(:git_log_command) { "git log 'HEAD' '^v0.1.0' --oneline --format='format:%h\t%s'" }
         let(:git_log_output) { <<~LOG_OUTPUT }
@@ -457,6 +536,30 @@ RSpec.describe CreateGithubRelease::Project do
           [
             CreateGithubRelease::Change.new('14b04ec', 'Feature 1 (#25)'),
             CreateGithubRelease::Change.new('025fa29', 'Feature 2 (#24)')
+          ]
+        end
+
+        it { is_expected.to eq(expected_changes) }
+      end
+
+      context 'when this is the first release' do
+        let(:project_init_block) do
+          lambda do |p|
+            p.release_type = 'first'
+            p.next_release_version = '0.0.1'
+          end
+        end
+        let(:git_log_command) { "git log 'HEAD' --oneline --format='format:%h\t%s'" }
+        let(:git_log_output) { <<~LOG_OUTPUT }
+          14b04ec\tFeature 1 (#2)
+          025fa29\tInitial commit (#1)
+        LOG_OUTPUT
+        let(:mocked_commands) { [MockedCommand.new(git_log_command, stdout: git_log_output)] }
+
+        let(:expected_changes) do
+          [
+            CreateGithubRelease::Change.new('14b04ec', 'Feature 1 (#2)'),
+            CreateGithubRelease::Change.new('025fa29', 'Initial commit (#1)')
           ]
         end
 
@@ -480,7 +583,7 @@ RSpec.describe CreateGithubRelease::Project do
           CreateGithubRelease::Change.new('38d20b1', 'Add new feature 1')
         ]
       end
-      before { project.changes = changes }
+      let(:project_init_block) { ->(p) { p.changes = changes } }
       it { is_expected.to eq(changes) }
     end
   end
@@ -489,15 +592,17 @@ RSpec.describe CreateGithubRelease::Project do
     subject { project.next_release_description }
 
     context 'when next_release_description is not explicitly set' do
-      before do
-        project.remote_url = URI.parse('https://github.com/username/repo')
-        project.last_release_tag = 'v0.1.0'
-        project.next_release_tag = 'v1.0.0'
-        project.next_release_date = Date.new(2022, 11, 7)
-        project.changes = [
-          CreateGithubRelease::Change.new('e718690', 'Release v1.0.0 (#3)'),
-          CreateGithubRelease::Change.new('ab598f3', 'Fix Rubocop offenses (#2)')
-        ]
+      let(:project_init_block) do
+        lambda do |p|
+          p.remote_url = URI.parse('https://github.com/username/repo')
+          p.last_release_version = '0.1.0'
+          p.next_release_version = '1.0.0'
+          p.next_release_date = Date.new(2022, 11, 7)
+          p.changes = [
+            CreateGithubRelease::Change.new('e718690', 'Release v1.0.0 (#3)'),
+            CreateGithubRelease::Change.new('ab598f3', 'Fix Rubocop offenses (#2)')
+          ]
+        end
       end
 
       let(:expected_next_release_description) do
@@ -517,12 +622,14 @@ RSpec.describe CreateGithubRelease::Project do
     end
 
     context 'when there are no changes' do
-      before do
-        project.remote_url = URI.parse('https://github.com/username/repo')
-        project.last_release_tag = 'v0.1.0'
-        project.next_release_tag = 'v1.0.0'
-        project.next_release_date = Date.new(2022, 11, 7)
-        project.changes = []
+      let(:project_init_block) do
+        lambda do |p|
+          p.remote_url = URI.parse('https://github.com/username/repo')
+          p.last_release_version = '0.1.0'
+          p.next_release_version = '1.0.0'
+          p.next_release_date = Date.new(2022, 11, 7)
+          p.changes = []
+        end
       end
 
       let(:expected_next_release_description) do
@@ -540,9 +647,38 @@ RSpec.describe CreateGithubRelease::Project do
       it { is_expected.to eq(expected_next_release_description) }
     end
 
+    context 'when this is the first release' do
+      let(:project_init_block) do
+        lambda do |p|
+          p.release_type = 'first'
+          p.remote_url = URI.parse('https://github.com/username/repo')
+          p.next_release_version = '0.0.1'
+          p.next_release_date = Date.new(2022, 11, 7)
+          p.changes = [
+            CreateGithubRelease::Change.new('e718690', 'Release v1.0.0 (#3)'),
+            CreateGithubRelease::Change.new('ab598f3', 'Fix Rubocop offenses (#2)')
+          ]
+          p.first_commit = '1234567'
+        end
+      end
+
+      let(:expected_next_release_description) { <<~NEXT_RELEASE_DESCRIPTION }
+        ## v0.0.1 (2022-11-07)
+
+        [Full Changelog](https://github.com/username/repo/compare/1234567..v0.0.1)
+
+        Changes:
+
+        * e718690 Release v1.0.0 (#3)
+        * ab598f3 Fix Rubocop offenses (#2)
+      NEXT_RELEASE_DESCRIPTION
+
+      it { is_expected.to eq(expected_next_release_description) }
+    end
+
     context 'when next_release_description is explicitly set' do
       let(:next_release_description) { 'This is a release description' }
-      before { project.next_release_description = next_release_description }
+      let(:project_init_block) { ->(p) { p.next_release_description = next_release_description } }
       it { is_expected.to eq(next_release_description) }
     end
   end
@@ -560,30 +696,33 @@ RSpec.describe CreateGithubRelease::Project do
     CHANGELOG
 
     context 'when last_release_changelog is not explicitly set' do
+      let(:project_init_block) { ->(p) { p.changelog_path = changelog_path } }
+
       before do
         allow(File).to receive(:read).and_call_original
         allow(File).to receive(:read).with(changelog_path).and_return(last_release_changelog)
-        project.changelog_path = changelog_path
       end
 
       it { is_expected.to eq(last_release_changelog) }
     end
 
     context 'when the changelog file does not exist' do
+      let(:project_init_block) { ->(p) { p.changelog_path = changelog_path } }
+
       before do
         allow(File).to receive(:read).and_call_original
         allow(File).to receive(:read).with(changelog_path).and_raise(Errno::ENOENT, 'No such file or directory')
-        project.changelog_path = changelog_path
       end
 
       it { is_expected.to eq('') }
     end
 
     context 'when the changelog file could not be read' do
+      let(:project_init_block) { ->(p) { p.changelog_path = changelog_path } }
+
       before do
         allow(File).to receive(:read).and_call_original
         allow(File).to receive(:read).with(changelog_path).and_raise(Errno::EACCES, 'Permission denied')
-        project.changelog_path = changelog_path
       end
 
       it 'should raise a RuntimeError' do
@@ -599,7 +738,7 @@ RSpec.describe CreateGithubRelease::Project do
 
         * e718690 Release v0.1.0 (#3)
       CHANGELOG
-      before { project.last_release_changelog = last_release_changelog }
+      let(:project_init_block) { ->(p) { p.last_release_changelog = last_release_changelog } }
       it { is_expected.to eq(last_release_changelog) }
     end
   end
@@ -644,20 +783,45 @@ RSpec.describe CreateGithubRelease::Project do
     CHANGELOG
 
     context 'when next_release_changelog is not explicitly set' do
-      before do
-        project.last_release_changelog = last_release_changelog
-        project.next_release_description = next_release_description
+      let(:project_init_block) do
+        lambda do |p|
+          p.last_release_changelog = last_release_changelog
+          p.next_release_description = next_release_description
+        end
       end
 
       it { is_expected.to eq(expected_next_release_changelog) }
     end
 
     context 'when next_release_changelog is explicitly set' do
-      before do
-        project.next_release_changelog = expected_next_release_changelog
-      end
+      let(:project_init_block) { ->(p) { p.next_release_changelog = expected_next_release_changelog } }
 
       it { is_expected.to eq(expected_next_release_changelog) }
+    end
+  end
+
+  describe '#first_commit' do
+    subject { project.first_commit }
+    let(:project_init_block) { ->(p) { p.next_release_version = 'v1.0.0' } }
+
+    context 'when explicitly set with #first_commit=' do
+      let(:project_init_block) { ->(p) { p.first_commit = 'e718690' } }
+      it { is_expected.to eq('e718690') }
+    end
+
+    context 'when not explicitly set' do
+      let(:project_init_block) do
+        lambda do |p|
+          p.last_release_version = '0.0.1'
+          p.next_release_version = '1.0.0'
+        end
+      end
+
+      let(:mocked_commands) do
+        [MockedCommand.new("git log 'HEAD' --oneline --format='format:%h'", stdout: "1234567\ne718690\n")]
+      end
+
+      it { is_expected.to eq('e718690') }
     end
   end
 
@@ -675,7 +839,7 @@ RSpec.describe CreateGithubRelease::Project do
     end
 
     context 'when explicitly set to true with #verbose=' do
-      before { project.verbose = true }
+      let(:project_init_block) { ->(p) { p.verbose = true } }
       it { is_expected.to eq(true) }
     end
   end
@@ -694,7 +858,7 @@ RSpec.describe CreateGithubRelease::Project do
     end
 
     context 'when explicitly set to true with #quiet=' do
-      before { project.quiet = true }
+      let(:project_init_block) { ->(p) { p.quiet = true } }
       it { is_expected.to eq(true) }
     end
   end
@@ -702,11 +866,11 @@ RSpec.describe CreateGithubRelease::Project do
   describe '#backtick_debug?' do
     subject { project.send('backtick_debug?') }
     context 'when #verbose? is true' do
-      before { project.verbose = true }
+      let(:project_init_block) { ->(p) { p.verbose = true } }
       it { is_expected.to eq(true) }
     end
     context 'when #verbose? is false' do
-      before { project.verbose = false }
+      let(:project_init_block) { ->(p) { p.verbose = false } }
       it { is_expected.to eq(false) }
     end
   end
@@ -726,6 +890,7 @@ RSpec.describe CreateGithubRelease::Project do
     end
 
     let(:expected_result) { <<~EXPECTED_RESULT }
+      first_release: false
       default_branch: main
       next_release_tag: v1.0.0
       next_release_date: 2023-02-01

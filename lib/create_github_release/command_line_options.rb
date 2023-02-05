@@ -8,7 +8,7 @@ module CreateGithubRelease
   # An array of the valid release types
   # @return [Array<String>]
   # @api private
-  VALID_RELEASE_TYPES = %w[major minor patch].freeze
+  VALID_RELEASE_TYPES = %w[major minor patch first].freeze
 
   # Regex pattern for a [valid git reference](https://git-scm.com/docs/git-check-ref-format)
   # @return [Regexp]
@@ -34,7 +34,7 @@ module CreateGithubRelease
   ) do
     # @attribute release_type [rw] the type of release to create
     #
-    #   Must be one of 'major', 'minor', or 'patch'
+    #   Must be one of the VALID_RELEASE_TYPES
     #
     #   @example
     #     options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')

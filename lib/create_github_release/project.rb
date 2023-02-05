@@ -22,7 +22,8 @@ module CreateGithubRelease
     #
     # The recommended way to set the attributes is to use method 2 to override values
     # and otherwise method 3 to use the default value. Method 1 is only recommended for testing
-    # or if there is no other way to accomplish what you need.
+    # or if there is no other way to accomplish what you need. Method 1 should ONLY be
+    # used in the block passed to the initializer.
     #
     # @example calling `.new` without a block
     #   options = CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'minor' }
@@ -45,6 +46,8 @@ module CreateGithubRelease
     def initialize(options)
       @options = options
       yield self if block_given?
+
+      setup_first_release if release_type == 'first'
     end
 
     # @!attribute options [r]
@@ -65,7 +68,9 @@ module CreateGithubRelease
       :last_release_tag, :last_release_version, :release_branch, :release_log_url,
       :release_type, :release_url, :remote, :remote_base_url, :remote_repository, :remote_url,
       :changelog_path, :changes, :next_release_description, :last_release_changelog,
-      :next_release_changelog, :verbose, :quiet
+      :next_release_changelog, :first_commit, :verbose, :quiet
+
+    # attr_writer :first_release
 
     # @!attribute [rw] default_branch
     #
@@ -206,12 +211,7 @@ module CreateGithubRelease
     # @api public
     #
     def next_release_version
-      @next_release_version ||= options.next_release_version || begin
-        output = `bump show-next #{release_type}`
-        raise 'Could not determine next version using bump' unless $CHILD_STATUS.success?
-
-        output.lines.last.chomp
-      end
+      @next_release_version ||= options.next_release_version || bump_show_next_version
     end
 
     # @!attribute [rw] last_release_tag
@@ -237,7 +237,7 @@ module CreateGithubRelease
     # @api public
     #
     def last_release_tag
-      @last_release_tag ||= "v#{last_release_version}"
+      @last_release_tag ||= (first_release? ? '' : "v#{last_release_version}")
     end
 
     # @!attribute [rw] last_release_version
@@ -262,12 +262,7 @@ module CreateGithubRelease
     # @api public
     #
     def last_release_version
-      @last_release_version ||= options.last_release_version || begin
-        output = `bump current`
-        raise 'Could not determine current version using bump' unless $CHILD_STATUS.success?
-
-        output.lines.last.chomp
-      end
+      @last_release_version ||= options.last_release_version || bump_current_version
     end
 
     # @!attribute [rw] release_branch
@@ -321,7 +316,11 @@ module CreateGithubRelease
     # @api public
     #
     def release_log_url
-      @release_log_url ||= URI.parse("#{remote_url}/compare/#{last_release_tag}..#{next_release_tag}")
+      @release_log_url ||= begin
+        from = first_release? ? first_commit : last_release_tag
+        to = next_release_tag
+        URI.parse("#{remote_url}/compare/#{from}..#{to}")
+      end
     end
 
     # @!attribute [rw] release_type
@@ -536,7 +535,9 @@ module CreateGithubRelease
     #
     def changes
       @changes ||= begin
-        command = "git log 'HEAD' '^#{last_release_tag}' --oneline --format='format:%h\t%s'"
+        tip = "'HEAD'"
+        base = first_release? ? '' : "'^#{last_release_tag}' "
+        command = "git log #{tip} #{base}--oneline --format='format:%h\t%s'"
         git_log = `#{command}`
         raise "Could not determine changes since #{last_release_tag}" unless $CHILD_STATUS.success?
 
@@ -573,15 +574,18 @@ module CreateGithubRelease
     # @api public
     #
     def next_release_description
-      @next_release_description ||= <<~DESCRIPTION
-        ## #{next_release_tag} (#{next_release_date.strftime('%Y-%m-%d')})
+      @next_release_description ||= begin
+        header = first_release? ? 'Changes:' : "Changes since #{last_release_tag}:"
+        <<~DESCRIPTION
+          ## #{next_release_tag} (#{next_release_date.strftime('%Y-%m-%d')})
 
-        [Full Changelog](#{release_log_url})
+          [Full Changelog](#{release_log_url})
 
-        Changes since #{last_release_tag}:
+          #{header}
 
-        #{list_of_changes}
-      DESCRIPTION
+          #{list_of_changes}
+        DESCRIPTION
+      end
     end
 
     # @!attribute [rw] last_release_changelog
@@ -689,6 +693,7 @@ module CreateGithubRelease
     #
     def to_s
       <<~OUTPUT
+        first_release: #{first_release}
         default_branch: #{default_branch}
         next_release_tag: #{next_release_tag}
         next_release_date: #{next_release_date}
@@ -758,7 +763,83 @@ module CreateGithubRelease
 
     alias quiet? quiet
 
+    # @!attribute [rw] last_release_changelog
+    #
+    # true if release_type is 'first' otherwise false
+    #
+    # @example Returns true if release_type is 'first'
+    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'first')
+    #   project = CreateGithubRelease::Project.new(options)
+    #   project.first_release? #=> true
+    #
+    # @example Returnss false if release_type is not 'first'
+    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   project = CreateGithubRelease::Project.new(options)
+    #   project.first_release? #=> false
+    #
+    # @return [Boolean]
+    #
+    # @api public
+    #
+    def first_release
+      @first_release ||= release_type == 'first'
+    end
+
+    alias first_release? first_release
+
+    # @!attribute [rw] first_commit
+    #
+    # The SHA of the oldest commit that is an ancestor of HEAD
+    #
+    # @example
+    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   project = CreateGithubRelease::Project.new(options)
+    #   project.first_commit? #=> '1234567'
+    #
+    # @return [String]
+    #
+    # @api public
+    #
+    def first_commit
+      @first_commit ||= begin
+        command = "git log 'HEAD' --oneline --format='format:%h'"
+        git_log = `#{command}`
+        raise "Could not list changes from first commit up to #{last_release_tag}" unless $CHILD_STATUS.success?
+
+        git_log.split("\n").last.chomp
+      end
+    end
+
     private
+
+    # The current version of the project as determined by bump
+    # @return [String] The current version of the project
+    # @api private
+    def bump_current_version
+      output = `bump current`
+      raise 'Could not determine current version using bump' unless $CHILD_STATUS.success?
+
+      output.lines.last.chomp
+    end
+
+    # The next version of the project as determined by bump and release_type
+    # @return [String] The next version of the project
+    # @api private
+    def bump_show_next_version
+      output = `bump show-next #{release_type}`
+      raise 'Could not determine next version using bump' unless $CHILD_STATUS.success?
+
+      output.lines.last.chomp
+    end
+
+    # Setup versions and tags for a first release
+    # @return [Void]
+    # @api private
+    def setup_first_release
+      self.next_release_version = @next_release_version || bump_current_version
+      self.last_release_version = ''
+      self.last_release_tag = ''
+    end
 
     # The list of changes in the release as a string
     # @return [String] The list of changes in the release as a string

@@ -147,6 +147,14 @@ RSpec.describe CreateGithubRelease::CommandLineOptions do
       end
     end
 
+    context "when release_type is 'first'" do
+      before do
+        options.release_type = 'first'
+      end
+
+      it { is_expected.to have_attributes(valid?: true, errors: []) }
+    end
+
     context 'when release_type is nil' do
       before do
         options.release_type = nil
