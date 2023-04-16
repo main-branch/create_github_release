@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'bump'
+require 'semverify'
 require 'uri'
 
 module CreateGithubRelease
@@ -193,7 +193,7 @@ module CreateGithubRelease
     #
     # The version of the next release
     #
-    # @example By default, `next_release_version` is based on the value returned by `bump show-next <release_type>`
+    # @example By default, `next_release_version` is based on the value returned by `semverify <release_type> --dry-run`
     #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.next_release_version #=> '1.0.0'
@@ -206,12 +206,12 @@ module CreateGithubRelease
     #
     # @return [String]
     #
-    # @raise [RuntimeError] if the bump command fails
+    # @raise [RuntimeError] if the semverify command fails
     #
     # @api public
     #
     def next_release_version
-      @next_release_version ||= options.next_release_version || bump_show_next_version
+      @next_release_version ||= options.next_release_version || next_version
     end
 
     # @!attribute [rw] last_release_tag
@@ -244,7 +244,7 @@ module CreateGithubRelease
     #
     # The version of the last release
     #
-    # @example By default, `last_release_version` is based on the value returned by `bump current`
+    # @example By default, `last_release_version` is based on the value returned by `semverify current`
     #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.last_release_version #=> '0.0.1'
@@ -257,12 +257,12 @@ module CreateGithubRelease
     #
     # @return [String]
     #
-    # @raise [RuntimeError] if the bump command fails
+    # @raise [RuntimeError] if the semverify command fails
     #
     # @api public
     #
     def last_release_version
-      @last_release_version ||= options.last_release_version || bump_current_version
+      @last_release_version ||= options.last_release_version || current_version
     end
 
     # @!attribute [rw] release_branch
@@ -283,7 +283,7 @@ module CreateGithubRelease
     #
     # @return [String]
     #
-    # @raise [RuntimeError] if the bump command fails
+    # @raise [RuntimeError] if the semverify command fails
     #
     # @api public
     #
@@ -311,7 +311,7 @@ module CreateGithubRelease
     #
     # @return [URI]
     #
-    # @raise [RuntimeError] if the bump command fails
+    # @raise [RuntimeError] if the semverify command fails
     #
     # @api public
     #
@@ -327,7 +327,7 @@ module CreateGithubRelease
     #
     # The type of the release being created (e.g. 'major', 'minor', 'patch')
     #
-    # @note this must be one of the values accepted by the `bump` command
+    # @note this must be one of the values accepted by the `semverify` command
     #
     # @example By default, this value comes from the options object
     #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
@@ -812,22 +812,22 @@ module CreateGithubRelease
 
     private
 
-    # The current version of the project as determined by bump
+    # The current version of the project as determined by semverify
     # @return [String] The current version of the project
     # @api private
-    def bump_current_version
-      output = `bump current`
-      raise 'Could not determine current version using bump' unless $CHILD_STATUS.success?
+    def current_version
+      output = `semverify current`
+      raise 'Could not determine current version using semverify' unless $CHILD_STATUS.success?
 
       output.lines.last.chomp
     end
 
-    # The next version of the project as determined by bump and release_type
+    # The next version of the project as determined by semverify and release_type
     # @return [String] The next version of the project
     # @api private
-    def bump_show_next_version
-      output = `bump show-next #{release_type}`
-      raise 'Could not determine next version using bump' unless $CHILD_STATUS.success?
+    def next_version
+      output = `semverify next-#{release_type} --dry-run`
+      raise 'Could not determine next version using semverify' unless $CHILD_STATUS.success?
 
       output.lines.last.chomp
     end
@@ -836,7 +836,7 @@ module CreateGithubRelease
     # @return [Void]
     # @api private
     def setup_first_release
-      self.next_release_version = @next_release_version || bump_current_version
+      self.next_release_version = @next_release_version || current_version
       self.last_release_version = ''
       self.last_release_tag = ''
     end

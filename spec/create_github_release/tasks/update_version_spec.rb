@@ -23,8 +23,8 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateVersion do
 
     context 'when this is the first release' do
       let(:release_type) { 'first' }
-      it 'should not bump the version' do
-        expect(task).not_to receive(:bump_version)
+      it 'should not increment the version' do
+        expect(task).not_to receive(:increment_version)
         subject
       end
     end
@@ -32,35 +32,35 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateVersion do
     context 'when this is NOT the first release' do
       let(:mocked_commands) do
         [
-          MockedCommand.new('bump major --no-commit', exitstatus: bump_exitstatus),
-          MockedCommand.new('bump file', stdout: "#{version_file}\n", exitstatus: bump_file_exitstatus),
+          MockedCommand.new('semverify next-major', exitstatus: semverify_exitstatus),
+          MockedCommand.new('semverify file', stdout: "#{version_file}\n", exitstatus: semverify_file_exitstatus),
           MockedCommand.new("git add \"#{version_file}\"", exitstatus: git_exitstatus)
         ]
       end
 
-      let(:bump_exitstatus) { 0 }
-      let(:bump_file_exitstatus) { 0 }
+      let(:semverify_exitstatus) { 0 }
+      let(:semverify_file_exitstatus) { 0 }
       let(:git_exitstatus) { 0 }
 
-      context 'when bump and git add succeed' do
+      context 'when semverify and git add succeed' do
         it 'should succeed' do
           expect { subject }.not_to raise_error
         end
       end
 
-      context 'when bump fails to increment the version' do
-        let(:bump_exitstatus) { 1 }
+      context 'when semverify fails to increment the version' do
+        let(:semverify_exitstatus) { 1 }
         it 'should fail' do
           expect { subject }.to raise_error(SystemExit)
-          expect(stderr).to start_with('ERROR: Could not bump version')
+          expect(stderr).to start_with('ERROR: Could not increment version')
         end
       end
 
-      context 'when bump file fails' do
-        let(:bump_file_exitstatus) { 1 }
+      context 'when `semverify file` fails' do
+        let(:semverify_file_exitstatus) { 1 }
         it 'should fail' do
           expect { subject }.to raise_error(SystemExit)
-          expect(stderr).to start_with('ERROR: Bump could determine the version file')
+          expect(stderr).to start_with('ERROR: Semverify could determine the version file')
         end
       end
 

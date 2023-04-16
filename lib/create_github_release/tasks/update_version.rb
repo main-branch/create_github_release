@@ -5,12 +5,12 @@ require 'create_github_release/task_base'
 
 module CreateGithubRelease
   module Tasks
-    # Update the gem version using Bump
+    # Update the gem version using semverify
     #
     # @api public
     #
     class UpdateVersion < TaskBase
-      # Update the gem version using Bump
+      # Update the gem version using semverify
       #
       # @example
       #   require 'create_github_release'
@@ -33,35 +33,34 @@ module CreateGithubRelease
         return if project.first_release?
 
         print 'Updating version...'
-        bump_version
+        increment_version
         stage_version_file
       end
 
       private
 
-      # Update the version using bump
+      # Increment the version using semverify
       # @return [void]
       # @api private
-      def bump_version
-        `bump #{project.release_type} --no-commit`
-        error 'Could not bump version' unless $CHILD_STATUS.success?
+      def increment_version
+        `semverify next-#{project.release_type}`
+        error 'Could not increment version' unless $CHILD_STATUS.success?
       end
 
-      # Return the path the the version file using bump
+      # Return the path the the version file using semverify
       # @return [String]
       # @api private
-      def bump_version_file
-        output = `bump file`
-        error 'Bump could determine the version file' unless $CHILD_STATUS.success?
+      def version_file
+        output = `semverify file`
+        error 'Semverify could determine the version file' unless $CHILD_STATUS.success?
 
         output.lines.last.chomp
       end
 
-      # Identify the version file using bump and stage the change to it
+      # Identify the version file using semverify and stage the change to it
       # @return [void]
       # @api private
       def stage_version_file
-        version_file = bump_version_file
         `git add "#{version_file}"`
         if $CHILD_STATUS.success?
           puts 'OK'
