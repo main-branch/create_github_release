@@ -26,10 +26,6 @@ end
 CLEAN << 'pkg'
 CLOBBER << 'Gemfile.lock'
 
-# Bump
-
-require 'bump/tasks'
-
 # RSpec
 
 require 'rspec/core/rake_task'
