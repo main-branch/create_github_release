@@ -13,7 +13,7 @@ module CreateGithubRelease
   # Regex pattern for a [valid git reference](https://git-scm.com/docs/git-check-ref-format)
   # @return [Regexp]
   # @api private
-  VALID_REF_PATTERN = /^(?:(?:[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*)|(?:[a-zA-Z0-9-]+))$/.freeze
+  VALID_REF_PATTERN = /^(?:(?:[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*)|(?:[a-zA-Z0-9-]+))$/
 
   # rubocop:disable Metrics/ClassLength
 
