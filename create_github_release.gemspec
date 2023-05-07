@@ -37,10 +37,12 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'semverify', '~> 0.3'
 
   spec.add_development_dependency 'bundler-audit', '~> 0.9'
+  spec.add_development_dependency 'debug', '~> 1.7'
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'redcarpet', '~> 3.5'
   spec.add_development_dependency 'rspec', '~> 3.10'
   spec.add_development_dependency 'rubocop', '~> 1.36'
+  spec.add_development_dependency 'ruby-debug-ide', '~> 0.7'
   spec.add_development_dependency 'simplecov', '~> 0.21'
   spec.add_development_dependency 'simplecov-lcov', '~> 0.8'
   spec.add_development_dependency 'solargraph', '~> 0.49'
