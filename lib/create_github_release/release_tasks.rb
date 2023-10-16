@@ -24,7 +24,7 @@ module CreateGithubRelease
     #   tasks = CreateGithubRelease::ReleaseTasks.new(options)
     #   tasks.options # => #<CreateGithubRelease::Options:0x00007f9b0a0b0a00>
     #
-    # @return [CreateGithubRelease::Options]
+    # @return [CreateGithubRelease::CommandLineOptions]
     attr_reader :options
 
     # Create a new instance of ReleaseTasks
@@ -71,6 +71,7 @@ module CreateGithubRelease
     #
     def run
       TASKS.each do |task_class|
+        # @sg-ignore
         task_class.new(options).run
       end
     end

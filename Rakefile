@@ -3,7 +3,7 @@
 # The default task
 
 desc 'Run the same tasks that the CI build will run'
-task default: %w[spec rubocop yard yard:audit yard:coverage bundle:audit build]
+task default: %w[spec rubocop yard yard:audit yard:coverage solargraph:typecheck bundle:audit build]
 
 # Bundler Audit
 
@@ -73,6 +73,13 @@ require 'yardstick/rake/verify'
 
 Yardstick::Rake::Verify.new(:'yard:coverage') do |verify|
   verify.threshold = 100
+end
+
+# Solargraph typecheck
+
+desc 'Run the solargraph type checker'
+task :'solargraph:typecheck' do
+  sh 'bundle exec solargraph typecheck --level=typed'
 end
 
 # Additional cleanup
