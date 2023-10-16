@@ -23,4 +23,8 @@ puts <<~MESSAGE unless project.quiet
   git checkout #{project.default_branch}
   git merge --ff-only #{project.release_branch}
   git push
+
+  Wait for the CI build to pass and then release the gem with the following command:
+
+  rake release:rubygem_push
 MESSAGE
