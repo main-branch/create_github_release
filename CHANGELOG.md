@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.1.0 (2023-10-15)
+
+[Full Changelog](https://github.com/main-branch/create_github_release/compare/v1.0.0..v1.1.0)
+
+Changes since v1.0.0:
+
+* 5088cd0 Add instruction for publishing the resulting gem (#41)
+* 60553b0 Integrate solargraph:typecheck into Rake and fix any problems (#40)
+* c0dd2d8 Improve reporting of code not covered by tests (#38)
+* 5dff0b5 Tell rubocop development dependencies go in the gemspec (#39)
+* d55f2f4 Merge pull request #37 from main-branch/debugging_support
+* 4a28c4c Allow the build to continue if the Ruby head build fails
+* 2814761 Add launch.json to run the ruby debugger in VS Code
+* c3de36d Require 'debug' in spec_helper so `binding.break` can be used
+* 3f3276d Add gems needed for debugging
+* e299d97 Replace 'bump' with 'semverify' (#35)
+* 68fa672 Drop support for Ruby 2.7 and require at least Ruby 3.0 (#36)
+
 ## v1.0.0 (2023-02-05)
 
 [Full Changelog](https://github.com/main-branch/create_github_release/compare/v0.3.0..v1.0.0)
