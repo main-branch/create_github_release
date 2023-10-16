@@ -2,8 +2,6 @@
 
 require 'uri'
 
-# rubocop:disable Metrics/ModuleLength
-
 module CreateGithubRelease
   # An array of the valid release types
   # @return [Array<String>]
@@ -14,6 +12,13 @@ module CreateGithubRelease
   # @return [Regexp]
   # @api private
   VALID_REF_PATTERN = /^(?:(?:[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*)|(?:[a-zA-Z0-9-]+))$/
+
+  # An array of the allowed options that can be passed to `.new`
+  # @return [Array<Symbol>]
+  ALLOWED_OPTIONS = %i[
+    release_type default_branch release_branch remote last_release_version
+    next_release_version changelog_path quiet verbose
+  ].freeze
 
   # rubocop:disable Metrics/ClassLength
 
@@ -27,11 +32,9 @@ module CreateGithubRelease
   #
   # @api public
   #
-  CommandLineOptions = Struct.new(
-    :release_type, :default_branch, :release_branch, :remote, :last_release_version,
-    :next_release_version, :changelog_path, :quiet, :verbose,
-    keyword_init: true
-  ) do
+  class CommandLineOptions
+    ALLOWED_OPTIONS.each { |option| attr_accessor option }
+
     # @attribute release_type [rw] the type of release to create
     #
     #   Must be one of the VALID_RELEASE_TYPES
@@ -129,11 +132,14 @@ module CreateGithubRelease
     # @yieldparam self [CreateGithubRelease::CommandLineOptions] the instance being initialized
     # @yieldreturn [void] the return value is ignored
     #
-    def initialize(*)
-      super
+    def initialize(**options)
+      assert_no_unknown_options(options)
+      options.each { |k, v| instance_variable_set("@#{k}", v) }
+
       self.quiet ||= false
       self.verbose ||= false
       @errors = []
+
       yield(self) if block_given?
     end
 
@@ -192,6 +198,17 @@ module CreateGithubRelease
 
     private
 
+    # Raise ArgumentError if options has a key not in ALLOWED_OPTIONS
+    # @return [void]
+    # @api private
+    def assert_no_unknown_options(options)
+      unknown_options = options.keys - ALLOWED_OPTIONS
+      return if unknown_options.empty?
+
+      message = "Unknown keywords: #{unknown_options.join(', ')}"
+      raise ArgumentError, message
+    end
+
     # Returns `true` if the given name is a valid git reference
     # @return [Boolean]
     # @api private
@@ -229,19 +246,13 @@ module CreateGithubRelease
       false
     end
 
-    # Returns a string representation of the valid release types
-    # @return [String]
-    # @api private
-    def valid_release_types
-      "'#{VALID_RELEASE_TYPES.join("', '")}'"
-    end
-
     # Returns `true` if the `#release_type` is not nil
     # @return [Boolean]
     # @api private
     def validate_release_type_given
       return true unless release_type.nil?
 
+      valid_release_types = "'#{VALID_RELEASE_TYPES.join("', '")}'"
       @errors << "RELEASE_TYPE must be given and be one of #{valid_release_types}"
       false
     end
@@ -252,6 +263,7 @@ module CreateGithubRelease
     def validate_release_type
       return true if release_type.nil? || VALID_RELEASE_TYPES.include?(release_type)
 
+      valid_release_types = "'#{VALID_RELEASE_TYPES.join("', '")}'"
       @errors << "RELEASE_TYPE '#{release_type}' is not valid. Must be one of #{valid_release_types}"
       false
     end
@@ -364,4 +376,3 @@ module CreateGithubRelease
   end
   # rubocop:enable Metrics/ClassLength
 end
-# rubocop:enable Metrics/ModuleLength

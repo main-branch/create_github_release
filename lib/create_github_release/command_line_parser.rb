@@ -46,7 +46,7 @@ module CreateGithubRelease
     #
     # @param args [Array<String>] the command line arguments
     #
-    # @return [CreateGithubRelease::Options] the options
+    # @return [CreateGithubRelease::CommandLineOptions] the options
     #
     def parse(*args)
       begin
@@ -72,7 +72,7 @@ module CreateGithubRelease
     #   options = parser.options
     #   options.release_type # => 'major'
     #
-    # @return [CreateGithubRelease::Options] the options
+    # @return [CreateGithubRelease::CommandLineOptions] the options
     #
     # @api private
     #
@@ -128,6 +128,7 @@ module CreateGithubRelease
     # @return [void]
     # @api private
     def define_options
+      # @sg-ignore
       option_parser.banner = "Usage:\n#{command_template}"
       option_parser.separator ''
       option_parser.separator "RELEASE_TYPE must be 'major', 'minor', or 'patch'"

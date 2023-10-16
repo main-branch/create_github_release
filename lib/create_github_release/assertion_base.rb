@@ -30,8 +30,6 @@ module CreateGithubRelease
       raise NotImplementedError
     end
 
-    # @!attribute [r] options
-    #
     # The project passed to the assertion object
     # @return [CreateGithubRelease::Project] the project to create a release for
     # @api private

@@ -9,6 +9,13 @@ RSpec.describe CreateGithubRelease::CommandLineOptions do
   let(:options) { described_class.new }
 
   describe '#initialize' do
+    context 'with unknown options' do
+      subject { described_class.new(unknown: 'bogus') }
+      it 'should raise an ArgumentError' do
+        expect { subject }.to raise_error(ArgumentError)
+      end
+    end
+
     context 'without a block or keyword args (default values)' do
       subject { described_class.new }
       it do

@@ -367,7 +367,7 @@ module CreateGithubRelease
     #   project.release_url = URI.parse('https://github.com/org/repo/releases/tag/v1.0.0')
     #   project.release_url #=> #<URI::HTTPS https://github.com/org/repo/releases/tag/v1.0.0>
     #
-    # @return [URI]
+    # @return [URI::Generic]
     #
     # @api public
     #
@@ -419,7 +419,7 @@ module CreateGithubRelease
     #   project.remote_base_url = URI.parse('https://github.com/')
     #   project.remote_base_url #=> #<URI::HTTPS https://github.com/>
     #
-    # @return [URI]
+    # @return [URI::Generic]
     #
     # @api public
     #
@@ -833,7 +833,7 @@ module CreateGithubRelease
     end
 
     # Setup versions and tags for a first release
-    # @return [Void]
+    # @return [void]
     # @api private
     def setup_first_release
       self.next_release_version = @next_release_version || current_version
