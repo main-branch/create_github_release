@@ -197,7 +197,7 @@ RSpec.describe CreateGithubRelease::Project do
       it { is_expected.to eq('1.2.3') }
     end
 
-    context 'when not otherwise specified' do
+    context 'when not explicitly set and not set in options' do
       context 'when this is the first release' do
         let(:release_type) { 'first' }
         let(:mocked_commands) { [MockedCommand.new('semverify current', stdout: "1.0.0\n")] }
@@ -206,24 +206,92 @@ RSpec.describe CreateGithubRelease::Project do
         end
       end
 
-      context 'when the semverify command succeeds' do
-        let(:mocked_commands) { [MockedCommand.new('semverify next-major --dry-run', stdout: "1.0.0\n")] }
-        it { is_expected.to eq('1.0.0') }
+      context 'when release_type is pre' do
+        context 'when asking for the next pre-release of the same type' do
+          let(:project_init_block) do
+            lambda do |p|
+              p.release_type = 'pre'
+              p.pre = true
+            end
+          end
+
+          let(:mocked_commands) do
+            [
+              MockedCommand.new('semverify next-pre --pre --dry-run', stdout: "1.0.0-alpha.2\n")
+            ]
+          end
+
+          it { is_expected.to eq('1.0.0-alpha.2') }
+        end
+
+        context 'when asking for the next pre-release of a different type' do
+          let(:project_init_block) do
+            lambda do |p|
+              p.release_type = 'pre'
+              p.pre = true
+              p.pre_type = 'beta'
+            end
+          end
+
+          let(:mocked_commands) do
+            [
+              MockedCommand.new('semverify next-pre --pre --pre-type=beta --dry-run', stdout: "1.0.0-beta.1\n")
+            ]
+          end
+
+          it { is_expected.to eq('1.0.0-beta.1') }
+        end
       end
 
-      context 'when the semverify command succeeds with extra output' do
+      context 'when release_type is release' do
+        let(:project_init_block) { ->(p) { p.release_type = 'release' } }
+
         let(:mocked_commands) do
           [
-            MockedCommand.new('semverify next-major --dry-run', stdout: "Resolving dependencies...\n1.0.0\n")
+            MockedCommand.new('semverify next-release --dry-run', stdout: "1.0.0\n")
           ]
         end
+
         it { is_expected.to eq('1.0.0') }
       end
 
-      context 'when the semverify command fails' do
-        let(:mocked_commands) { [MockedCommand.new('semverify next-major --dry-run', exitstatus: 1)] }
-        it 'should raise a RuntimeError' do
-          expect { subject }.to raise_error(RuntimeError)
+      context 'when release_type is major' do
+        context 'when the semverify command succeeds' do
+          let(:mocked_commands) { [MockedCommand.new('semverify next-major --dry-run', stdout: "1.0.0\n")] }
+          it { is_expected.to eq('1.0.0') }
+        end
+
+        context 'when the semverify command succeeds with extra output' do
+          let(:mocked_commands) do
+            [
+              MockedCommand.new('semverify next-major --dry-run', stdout: "Resolving dependencies...\n1.0.0\n")
+            ]
+          end
+          it { is_expected.to eq('1.0.0') }
+        end
+
+        context 'when the semverify command fails' do
+          let(:mocked_commands) { [MockedCommand.new('semverify next-major --dry-run', exitstatus: 1)] }
+          it 'should raise a RuntimeError' do
+            expect { subject }.to raise_error(RuntimeError)
+          end
+        end
+
+        context 'when asking for a pre-release version' do
+          let(:project_init_block) do
+            lambda do |p|
+              p.pre = true
+              p.pre_type = 'alpha'
+            end
+          end
+
+          let(:mocked_commands) do
+            [
+              MockedCommand.new('semverify next-major --pre --pre-type=alpha --dry-run', stdout: "1.0.0-alpha.1\n")
+            ]
+          end
+
+          it { is_expected.to eq('1.0.0-alpha.1') }
         end
       end
     end
@@ -380,7 +448,7 @@ RSpec.describe CreateGithubRelease::Project do
       end
     end
 
-    context 'when the release_type is not explicitly set' do
+    context 'when the release_type is explicitly set' do
       let(:project_init_block) { ->(p) { p.release_type = 'minor' } }
       it 'should return the set release type' do
         expect(subject).to eq('minor')
@@ -822,6 +890,44 @@ RSpec.describe CreateGithubRelease::Project do
       end
 
       it { is_expected.to eq('e718690') }
+    end
+  end
+
+  describe 'pre' do
+    subject { project.pre }
+
+    context 'when options.pre is true' do
+      before { options.pre = true }
+      it { is_expected.to eq(true) }
+    end
+
+    context 'when options.pre is false' do
+      before { options.pre = false }
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when explicitly set to true with #pre=' do
+      let(:project_init_block) { ->(p) { p.pre = true } }
+      it { is_expected.to eq(true) }
+    end
+  end
+
+  describe 'pre_type' do
+    subject { project.pre_type }
+
+    context 'when options.pre_type is "alpha"' do
+      before { options.pre_type = 'alpha' }
+      it { is_expected.to eq('alpha') }
+    end
+
+    context 'when options.pre_type is nil' do
+      before { options.pre_type = nil }
+      it { is_expected.to be_nil }
+    end
+
+    context 'when explicitly set to "alpha" with #pre_type=' do
+      let(:project_init_block) { ->(p) { p.pre_type = 'alpha' } }
+      it { is_expected.to eq('alpha') }
     end
   end
 

@@ -5,6 +5,8 @@ require 'optparse'
 require 'create_github_release/command_line_options'
 
 module CreateGithubRelease
+  # rubocop:disable Metrics/ClassLength
+
   # Parses the options for this script
   #
   # @example Specify the release type
@@ -131,14 +133,32 @@ module CreateGithubRelease
       # @sg-ignore
       option_parser.banner = "Usage:\n#{command_template}"
       option_parser.separator ''
-      option_parser.separator "RELEASE_TYPE must be 'major', 'minor', or 'patch'"
+      option_parser.separator "RELEASE_TYPE must be 'major', 'minor', 'patch', 'pre', 'release', or 'first'"
       option_parser.separator ''
       option_parser.separator 'Options:'
       %i[
-        define_help_option define_default_branch_option define_release_branch_option
-        define_remote_option define_last_release_version_option define_next_release_version_option
-        define_changelog_path_option define_quiet_option define_verbose_option
+        define_help_option define_default_branch_option define_release_branch_option define_pre_option
+        define_pre_type_option define_remote_option define_last_release_version_option
+        define_next_release_version_option define_changelog_path_option define_quiet_option define_verbose_option
       ].each { |m| send(m) }
+    end
+
+    # Define the pre option
+    # @return [void]
+    # @api private
+    def define_pre_option
+      option_parser.on('-p', '--pre', 'Create a pre-release') do |pre|
+        options.pre = pre
+      end
+    end
+
+    # Define the pre-type option
+    # @return [void]
+    # @api private
+    def define_pre_type_option
+      option_parser.on('-t', '--pre-type=TYPE', 'Type of pre-release to create (e.g. alpha, beta, etc.)') do |pre_type|
+        options.pre_type = pre_type
+      end
     end
 
     # Define the quiet option
@@ -226,4 +246,5 @@ module CreateGithubRelease
       end
     end
   end
+  # rubocop:enable Metrics/ClassLength
 end

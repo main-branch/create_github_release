@@ -66,9 +66,10 @@ module CreateGithubRelease
     attr_writer \
       :default_branch, :next_release_tag, :next_release_date, :next_release_version,
       :last_release_tag, :last_release_version, :release_branch, :release_log_url,
-      :release_type, :release_url, :remote, :remote_base_url, :remote_repository, :remote_url,
-      :changelog_path, :changes, :next_release_description, :last_release_changelog,
-      :next_release_changelog, :first_commit, :verbose, :quiet
+      :release_type, :pre, :pre_type, :release_url, :remote, :remote_base_url,
+      :remote_repository, :remote_url, :changelog_path, :changes,
+      :next_release_description, :last_release_changelog, :next_release_changelog,
+      :first_commit, :verbose, :quiet
 
     # attr_writer :first_release
 
@@ -348,6 +349,53 @@ module CreateGithubRelease
     #
     def release_type
       @release_type ||= options.release_type || raise(ArgumentError, 'release_type is required')
+    end
+
+    # @!attribute [rw] pre
+    #
+    # Set to true if a pre-release is be created
+    #
+    # @example By default, this value comes from the options object
+    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major', pre: true, pre_type: 'alpha')
+    #   project = CreateGithubRelease::Project.new(options)
+    #   project.pre #=> 'true'
+    #
+    # @example It can also be set explicitly
+    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   project = CreateGithubRelease::Project.new(options)
+    #   project.pre = true
+    #   project.pre #=> true
+    #
+    # @return [Boolean]
+    #
+    # @api public
+    #
+    def pre
+      @pre ||= options.pre
+    end
+
+    # @!attribute [rw] pre_type
+    #
+    # Set to the pre-release type to create. For example, "alpha", "beta", "pre", etc
+    #
+    # @example By default, this value comes from the options object
+    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major', pre: true, pre_type: 'alpha')
+    #   project = CreateGithubRelease::Project.new(options)
+    #   project.pre_type #=> 'alpha'
+    #
+    # @example It can also be set explicitly
+    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   project = CreateGithubRelease::Project.new(options)
+    #   project.pre = true
+    #   project.pre_type = 'alpha'
+    #   project.pre_type #=> 'alpha'
+    #
+    # @return [String]
+    #
+    # @api public
+    #
+    def pre_type
+      @pre_type ||= options.pre_type
     end
 
     # @!attribute [rw] release_url
@@ -826,10 +874,20 @@ module CreateGithubRelease
     # @return [String] The next version of the project
     # @api private
     def next_version
-      output = `semverify next-#{release_type} --dry-run`
+      output = `#{next_version_cmd}`
       raise 'Could not determine next version using semverify' unless $CHILD_STATUS.success?
 
       output.lines.last.chomp
+    end
+
+    # Construct the command used to get the next version
+    # @return [String]
+    # @api private
+    def next_version_cmd
+      cmd = "semverify next-#{release_type}"
+      cmd << ' --pre' if pre
+      cmd << " --pre-type=#{pre_type}" if pre_type
+      cmd << ' --dry-run'
     end
 
     # Setup versions and tags for a first release

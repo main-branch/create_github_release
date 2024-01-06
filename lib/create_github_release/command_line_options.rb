@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 require 'uri'
+require 'forwardable'
 
 module CreateGithubRelease
   # An array of the valid release types
   # @return [Array<String>]
   # @api private
-  VALID_RELEASE_TYPES = %w[major minor patch first].freeze
+  VALID_RELEASE_TYPES = %w[major minor patch pre release first].freeze
 
   # Regex pattern for a [valid git reference](https://git-scm.com/docs/git-check-ref-format)
   # @return [Regexp]
@@ -16,7 +17,7 @@ module CreateGithubRelease
   # An array of the allowed options that can be passed to `.new`
   # @return [Array<Symbol>]
   ALLOWED_OPTIONS = %i[
-    release_type default_branch release_branch remote last_release_version
+    release_type pre pre_type default_branch release_branch remote last_release_version
     next_release_version changelog_path quiet verbose
   ].freeze
 
@@ -138,9 +139,41 @@ module CreateGithubRelease
 
       self.quiet ||= false
       self.verbose ||= false
+      self.pre ||= false
       @errors = []
 
       yield(self) if block_given?
+
+      @validator = CommandLineOptionsValidator.new(self)
+
+      valid?
+    end
+
+    extend Forwardable
+    def_delegators :@validator, :valid?, :errors
+
+    private
+
+    # Raise ArgumentError if options has a key not in ALLOWED_OPTIONS
+    # @return [void]
+    # @api private
+    def assert_no_unknown_options(options)
+      unknown_options = options.keys - ALLOWED_OPTIONS
+      return if unknown_options.empty?
+
+      message = "Unknown keywords: #{unknown_options.join(', ')}"
+      raise ArgumentError, message
+    end
+  end
+
+  # Validates a set of options after the options have been fully initialized
+  # @api private
+  class CommandLineOptionsValidator
+    # Create a new instance of this class
+    # @param options [CreateGithubRelease::CommandLineOptions] the options to validate
+    # @api private
+    def initialize(options)
+      @options = options
     end
 
     # Returns `true` if all options are valid and `false` otherwise
@@ -198,29 +231,51 @@ module CreateGithubRelease
 
     private
 
-    # Raise ArgumentError if options has a key not in ALLOWED_OPTIONS
-    # @return [void]
+    # The options to validate
+    # @return [CreateGithubRelease::CommandLineOptions]
     # @api private
-    def assert_no_unknown_options(options)
-      unknown_options = options.keys - ALLOWED_OPTIONS
-      return if unknown_options.empty?
+    attr_reader :options
 
-      message = "Unknown keywords: #{unknown_options.join(', ')}"
-      raise ArgumentError, message
-    end
-
-    # Returns `true` if the given name is a valid git reference
+    # `true` if the given name is a valid git reference
     # @return [Boolean]
     # @api private
     def valid_reference?(name)
       VALID_REF_PATTERN.match?(name)
     end
 
+    # Returns `true` if `pre` is unset or if set with the appropriate release types
+    # @return [Boolean]
+    # @api private
+    def validate_pre
+      return true if options.pre == false || %w[major minor patch].include?(options.release_type)
+
+      @errors << '--pre can only be given with a release type of major, minor, or patch'
+      false
+    end
+
+    # Returns true if pre_type is nil or releast_type is 'pre' or the pre flag is set
+    # @return [Boolean]
+    # @api private
+    def validate_pre_type
+      return true if options.pre_type.nil? ||
+                     options.release_type == 'pre' ||
+                     (%w[major minor patch].include?(options.release_type) && options.pre == true)
+
+      @errors <<
+        if %w[major minor patch].include?(options.release_type)
+          '--pre must be given when --pre-type is given'
+        else
+          '--pre-type can only be given with a release type of major, minor, patch, or pre'
+        end
+
+      false
+    end
+
     # Returns `true` if the `#quiet` is `true` or `false` and `false` otherwise
     # @return [Boolean]
     # @api private
     def validate_quiet
-      return true if quiet == true || quiet == false
+      return true if options.quiet == true || options.quiet == false
 
       @errors << 'quiet must be either true or false'
       false
@@ -230,7 +285,7 @@ module CreateGithubRelease
     # @return [Boolean]
     # @api private
     def validate_verbose
-      return true if verbose == true || verbose == false
+      return true if options.verbose == true || options.verbose == false
 
       @errors << 'verbose must be either true or false'
       false
@@ -240,9 +295,9 @@ module CreateGithubRelease
     # @return [Boolean]
     # @api private
     def validate_only_quiet_or_verbose_given
-      return true unless quiet && verbose
+      return true unless options.quiet && options.verbose
 
-      @errors << 'Both --quiet and --verbose cannot both be used'
+      @errors << '--quiet and --verbose cannot be used together'
       false
     end
 
@@ -250,7 +305,7 @@ module CreateGithubRelease
     # @return [Boolean]
     # @api private
     def validate_release_type_given
-      return true unless release_type.nil?
+      return true unless options.release_type.nil?
 
       valid_release_types = "'#{VALID_RELEASE_TYPES.join("', '")}'"
       @errors << "RELEASE_TYPE must be given and be one of #{valid_release_types}"
@@ -261,10 +316,10 @@ module CreateGithubRelease
     # @return [Boolean]
     # @api private
     def validate_release_type
-      return true if release_type.nil? || VALID_RELEASE_TYPES.include?(release_type)
+      return true if options.release_type.nil? || VALID_RELEASE_TYPES.include?(options.release_type)
 
       valid_release_types = "'#{VALID_RELEASE_TYPES.join("', '")}'"
-      @errors << "RELEASE_TYPE '#{release_type}' is not valid. Must be one of #{valid_release_types}"
+      @errors << "RELEASE_TYPE '#{options.release_type}' is not valid. Must be one of #{valid_release_types}"
       false
     end
 
@@ -272,9 +327,9 @@ module CreateGithubRelease
     # @return [Boolean]
     # @api private
     def validate_default_branch
-      return true if default_branch.nil? || valid_reference?(default_branch)
+      return true if options.default_branch.nil? || valid_reference?(options.default_branch)
 
-      @errors << "--default-branch='#{default_branch}' is not valid"
+      @errors << "--default-branch='#{options.default_branch}' is not valid"
       false
     end
 
@@ -282,9 +337,9 @@ module CreateGithubRelease
     # @return [Boolean]
     # @api private
     def validate_release_branch
-      return true if release_branch.nil? || valid_reference?(release_branch)
+      return true if options.release_branch.nil? || valid_reference?(options.release_branch)
 
-      @errors << "--release-branch='#{release_branch}' is not valid"
+      @errors << "--release-branch='#{options.release_branch}' is not valid"
       false
     end
 
@@ -292,9 +347,9 @@ module CreateGithubRelease
     # @return [Boolean]
     # @api private
     def validate_remote
-      return true if remote.nil? || valid_reference?(remote)
+      return true if options.remote.nil? || valid_reference?(options.remote)
 
-      @errors << "--remote='#{remote}' is not valid"
+      @errors << "--remote='#{options.remote}' is not valid"
       false
     end
 
@@ -312,12 +367,12 @@ module CreateGithubRelease
     # @return [Boolean]
     # @api private
     def validate_last_release_version
-      return true if last_release_version.nil?
+      return true if options.last_release_version.nil?
 
-      if valid_gem_version?(last_release_version)
+      if valid_gem_version?(options.last_release_version)
         true
       else
-        @errors << "--last-release-version='#{last_release_version}' is not valid"
+        @errors << "--last-release-version='#{options.last_release_version}' is not valid"
         false
       end
     end
@@ -326,12 +381,12 @@ module CreateGithubRelease
     # @return [Boolean]
     # @api private
     def validate_next_release_version
-      return true if next_release_version.nil?
+      return true if options.next_release_version.nil?
 
-      if valid_gem_version?(next_release_version)
+      if valid_gem_version?(options.next_release_version)
         true
       else
-        @errors << "--next-release-version='#{next_release_version}' is not valid"
+        @errors << "--next-release-version='#{options.next_release_version}' is not valid"
         false
       end
     end
@@ -351,16 +406,16 @@ module CreateGithubRelease
     # @return [Boolean]
     # @api private
     def validate_changelog_path
-      changelog_path.nil? || (changelog_path_valid? && changelog_regular_file?)
+      options.changelog_path.nil? || (changelog_path_valid? && changelog_regular_file?)
     end
 
     # `true` if `#changelog_path` is a valid path
     # @return [Boolean]
     # @api private
     def changelog_path_valid?
-      return true if valid_path?(changelog_path)
+      return true if valid_path?(options.changelog_path)
 
-      @errors << "--changelog-path='#{changelog_path}' is not valid"
+      @errors << "--changelog-path='#{options.changelog_path}' is not valid"
       false
     end
 
@@ -368,9 +423,9 @@ module CreateGithubRelease
     # @return [Boolean]
     # @api private
     def changelog_regular_file?
-      return true unless File.exist?(changelog_path) && !File.file?(changelog_path)
+      return true unless File.exist?(options.changelog_path) && !File.file?(options.changelog_path)
 
-      @errors << "--changelog-path='#{changelog_path}' must be a regular file"
+      @errors << "--changelog-path='#{options.changelog_path}' must be a regular file"
       false
     end
   end
