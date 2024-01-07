@@ -2,9 +2,17 @@
 
 RSpec.describe CreateGithubRelease::Tasks::UpdateVersion do
   let(:release_type) { 'major' }
+  let(:pre) { false }
+  let(:pre_type) { nil }
   let(:task) { described_class.new(project) }
   let(:project) { CreateGithubRelease::Project.new(options) }
-  let(:options) { CreateGithubRelease::CommandLine::Options.new { |o| o.release_type = release_type } }
+  let(:options) do
+    CreateGithubRelease::CommandLine::Options.new do |o|
+      o.release_type = release_type
+      o.pre = pre
+      o.pre_type = pre_type
+    end
+  end
 
   let(:version_file) { 'lib/my_gem/version.rb' }
 
@@ -26,6 +34,68 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateVersion do
       it 'should not increment the version' do
         expect(task).not_to receive(:increment_version)
         subject
+      end
+    end
+
+    context 'when this is a pre-release when default pre-release type' do
+      let(:pre) { true }
+
+      let(:mocked_commands) do
+        [
+          MockedCommand.new('semverify next-major --pre', exitstatus: semverify_exitstatus),
+          MockedCommand.new('semverify file', stdout: "#{version_file}\n", exitstatus: semverify_file_exitstatus),
+          MockedCommand.new("git add \"#{version_file}\"", exitstatus: git_exitstatus)
+        ]
+      end
+
+      let(:semverify_exitstatus) { 0 }
+      let(:semverify_file_exitstatus) { 0 }
+      let(:git_exitstatus) { 0 }
+
+      it 'should increment the version with the --pre flag' do
+        expect { subject }.not_to raise_error
+      end
+    end
+
+    context 'when this is an alpha pre-release' do
+      let(:pre) { true }
+      let(:pre_type) { 'alpha' }
+
+      let(:mocked_commands) do
+        [
+          MockedCommand.new('semverify next-major --pre --pre-type=alpha', exitstatus: semverify_exitstatus),
+          MockedCommand.new('semverify file', stdout: "#{version_file}\n", exitstatus: semverify_file_exitstatus),
+          MockedCommand.new("git add \"#{version_file}\"", exitstatus: git_exitstatus)
+        ]
+      end
+
+      let(:semverify_exitstatus) { 0 }
+      let(:semverify_file_exitstatus) { 0 }
+      let(:git_exitstatus) { 0 }
+
+      it 'should increment the version with the --pre and --pre-type=alpha args' do
+        expect { subject }.not_to raise_error
+      end
+    end
+
+    context 'when changing the pre-release type to beta' do
+      let(:release_type) { 'pre' }
+      let(:pre_type) { 'beta' }
+
+      let(:mocked_commands) do
+        [
+          MockedCommand.new('semverify next-pre --pre-type=beta', exitstatus: semverify_exitstatus),
+          MockedCommand.new('semverify file', stdout: "#{version_file}\n", exitstatus: semverify_file_exitstatus),
+          MockedCommand.new("git add \"#{version_file}\"", exitstatus: git_exitstatus)
+        ]
+      end
+
+      let(:semverify_exitstatus) { 0 }
+      let(:semverify_file_exitstatus) { 0 }
+      let(:git_exitstatus) { 0 }
+
+      it 'should increment the version with the pre release type and --pre-type=alpha arg' do
+        expect { subject }.not_to raise_error
       end
     end
 
