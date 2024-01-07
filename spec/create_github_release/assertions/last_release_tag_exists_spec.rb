@@ -3,7 +3,7 @@
 RSpec.describe CreateGithubRelease::Assertions::LastReleaseTagExists do
   let(:release_type) { 'major' }
   let(:assertion) { described_class.new(project) }
-  let(:options) { CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = release_type } }
+  let(:options) { CreateGithubRelease::CommandLine::Options.new { |o| o.release_type = release_type } }
   let(:project) { CreateGithubRelease::Project.new(options) { |p| p.last_release_tag = 'v0.0.0' } }
 
   before do

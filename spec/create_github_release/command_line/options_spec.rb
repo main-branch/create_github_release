@@ -2,7 +2,7 @@
 
 require 'tmpdir'
 
-RSpec.describe CreateGithubRelease::CommandLineOptions do
+RSpec.describe CreateGithubRelease::CommandLine::Options do
   let(:current_version) { '0.1.0' }
   let(:release_type) { 'major' }
 
@@ -28,7 +28,9 @@ RSpec.describe CreateGithubRelease::CommandLineOptions do
           next_release_version: nil,
           changelog_path: nil,
           quiet: false,
-          verbose: false
+          verbose: false,
+          pre: false,
+          pre_type: nil
         )
       end
 
@@ -42,6 +44,8 @@ RSpec.describe CreateGithubRelease::CommandLineOptions do
       subject do
         described_class.new do |o|
           o.release_type = 'major'
+          o.pre = true
+          o.pre_type = 'alpha'
           o.default_branch = 'main'
           o.release_branch = 'release-v5.0.0'
           o.remote = 'origin'
@@ -56,6 +60,8 @@ RSpec.describe CreateGithubRelease::CommandLineOptions do
       it do
         is_expected.to have_attributes(
           release_type: 'major',
+          pre: true,
+          pre_type: 'alpha',
           default_branch: 'main',
           release_branch: 'release-v5.0.0',
           remote: 'origin',
@@ -74,6 +80,8 @@ RSpec.describe CreateGithubRelease::CommandLineOptions do
       subject do
         described_class.new(
           release_type: 'major',
+          pre: true,
+          pre_type: 'alpha',
           default_branch: 'main',
           release_branch: 'release-v5.0.0',
           remote: 'origin',
@@ -88,6 +96,8 @@ RSpec.describe CreateGithubRelease::CommandLineOptions do
       it do
         is_expected.to have_attributes(
           release_type: 'major',
+          pre: true,
+          pre_type: 'alpha',
           default_branch: 'main',
           release_branch: 'release-v5.0.0',
           remote: 'origin',
@@ -118,7 +128,7 @@ RSpec.describe CreateGithubRelease::CommandLineOptions do
         is_expected.to(
           have_attributes(
             valid?: false,
-            errors: [/^Both --quiet and --verbose cannot both be used/]
+            errors: [/^--quiet and --verbose cannot be used together/]
           )
         )
       end
@@ -189,6 +199,115 @@ RSpec.describe CreateGithubRelease::CommandLineOptions do
             errors: [/^RELEASE_TYPE 'bogus' is not valid/]
           )
         )
+      end
+    end
+
+    context 'when pre is true' do
+      context 'when release type is major, minor, or patch' do
+        it 'is exected to be valid' do
+          %w[major minor patch].each do |release_type|
+            options.release_type = release_type
+            options.pre = true
+            expect(subject).to have_attributes(valid?: true, errors: [])
+          end
+        end
+      end
+
+      context 'when release type is pre, release, or first' do
+        it 'is exected to NOT be valid' do
+          %w[pre release first].each do |release_type|
+            options.release_type = release_type
+            options.pre = true
+            expect(subject).to(
+              have_attributes(
+                valid?: false,
+                errors: ['--pre can only be given with a release type of major, minor, or patch']
+              )
+            )
+          end
+        end
+      end
+    end
+
+    context 'when pre_type is alpha' do
+      let(:pre_type) { 'alpha' }
+
+      before { options.pre_type = pre_type }
+
+      %w[major minor patch].each do |release_type|
+        context "when release type is #{release_type}" do
+          before { options.release_type = release_type }
+
+          context 'when pre is true' do
+            before { options.pre = true }
+            it { is_expected.to have_attributes(valid?: true, errors: []) }
+          end
+
+          context 'when pre is false' do
+            before { options.pre = false }
+            it 'is expected NOT to be valid' do
+              expect(subject).to have_attributes(valid?: false, errors: [/^--pre must be given when --pre-type is/])
+            end
+          end
+        end
+      end
+
+      context 'when release type is pre' do
+        before { options.release_type = 'pre' }
+
+        context 'when pre is true' do
+          before { options.pre = true }
+
+          it 'is expected NOT to be valid' do
+            expect(subject).to have_attributes(valid?: false, errors: [/^--pre can only be given with /])
+          end
+        end
+
+        context 'when pre is false' do
+          before { options.pre = false }
+
+          it { is_expected.to have_attributes(valid?: true, errors: []) }
+        end
+      end
+
+      context 'when release type is release' do
+        before { options.release_type = 'release' }
+
+        context 'when pre is true' do
+          before { options.pre = true }
+
+          it 'is expected NOT to be valid' do
+            expect(subject).to have_attributes(valid?: false, errors: [/^--pre can only /, /^--pre-type can only /])
+          end
+        end
+
+        context 'when pre is false' do
+          before { options.pre = false }
+
+          it 'is expected NOT to be valid' do
+            expect(subject).to have_attributes(valid?: false, errors: [/^--pre-type can only /])
+          end
+        end
+      end
+
+      context 'when release type is first' do
+        before { options.release_type = 'first' }
+
+        context 'when pre is true' do
+          before { options.pre = true }
+
+          it 'is expected NOT to be valid' do
+            expect(subject).to have_attributes(valid?: false, errors: [/^--pre can only /, /^--pre-type can only /])
+          end
+        end
+
+        context 'when pre is false' do
+          before { options.pre = false }
+
+          it 'is expected NOT to be valid' do
+            expect(subject).to have_attributes(valid?: false, errors: [/^--pre-type can only /])
+          end
+        end
       end
     end
 
@@ -276,7 +395,7 @@ RSpec.describe CreateGithubRelease::CommandLineOptions do
         is_expected.to(
           have_attributes(
             valid?: false,
-            errors: ["--changelog-path='A\u0000B' is not valid"]
+            errors: ["The change log path 'A\u0000B' is not a valid path"]
           )
         )
       end
@@ -285,15 +404,19 @@ RSpec.describe CreateGithubRelease::CommandLineOptions do
     context 'when changelog_path is not a path to a normal file' do
       before do
         options.changelog_path = 'CHANGELOG.md'
+        allow(File).to receive(:exist?).and_call_original
         allow(File).to receive(:exist?).with('CHANGELOG.md').and_return(true)
-        allow(File).to receive(:file?).with('CHANGELOG.md').and_return(false)
+        allow(File).to receive(:expand_path).and_call_original
+        allow(File).to receive(:expand_path).with('CHANGELOG.md').and_return('xxx')
+        allow(File).to receive(:file?).and_call_original
+        allow(File).to receive(:file?).with('xxx').and_return(false)
       end
 
       it do
         is_expected.to(
           have_attributes(
             valid?: false,
-            errors: ["--changelog-path='CHANGELOG.md' must be a regular file"]
+            errors: ["The change log path 'CHANGELOG.md' is not a regular file"]
           )
         )
       end

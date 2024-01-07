@@ -16,7 +16,7 @@ module CreateGithubRelease
       # @example
       #   require 'create_github_release'
       #
-      #   options = CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' }
+      #   options = CreateGithubRelease::CommandLine::Options.new { |o| o.release_type = 'major' }
       #   project = CreateGithubRelease::Project.new(options)
       #   task = CreateGithubRelease::Tasks::CreateGithubRelease.new(project)
       #   begin

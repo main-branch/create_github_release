@@ -3,7 +3,7 @@
 RSpec.describe CreateGithubRelease::Assertions::OnDefaultBranch do
   let(:assertion) { described_class.new(project) }
   let(:options) do
-    CreateGithubRelease::CommandLineOptions.new do |o|
+    CreateGithubRelease::CommandLine::Options.new do |o|
       o.release_type = 'major'
       o.default_branch = 'default-branch'
     end

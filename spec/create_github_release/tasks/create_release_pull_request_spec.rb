@@ -3,7 +3,7 @@
 RSpec.describe CreateGithubRelease::Tasks::CreateReleasePullRequest do
   let(:task) { described_class.new(project) }
 
-  let(:options) { CreateGithubRelease::CommandLineOptions.new(release_type: 'major') }
+  let(:options) { CreateGithubRelease::CommandLine::Options.new(release_type: 'major') }
 
   let(:default_branch) { 'main' }
   let(:next_release_tag) { 'v1.0.0' }

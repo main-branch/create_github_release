@@ -5,34 +5,46 @@
  [![Maintainability](https://api.codeclimate.com/v1/badges/b8c0af10b15a0ffeb1a1/maintainability)](https://codeclimate.com/github/main-branch/create_github_release/maintainability)
  [![Test Coverage](https://api.codeclimate.com/v1/badges/b8c0af10b15a0ffeb1a1/test_coverage)](https://codeclimate.com/github/main-branch/create_github_release/test_coverage)
 
-A script to manage your gem version and create a GitHub branch, PR, and release
-for a new gem version.
+When run in your gem's git worktree, the `create-github-release` script does the
+following:
 
-Since this script builds a changelog by listing the commits on the default branch,
-it works best if you are disciplined about squashing PR commits to the
-minimum number of commits necessary (usually one) in order to avoid a noisy changelog.
+* bumps the gem's version following SemVer,
+* updates the gems's changelog,
+* creates a new release branch and release tag,
+* commits the version and changelog changes to the release branch,
+* pushes these changes to GitHub and creates a PR to merge the release branch to the
+  default branch
 
-Tested on Ruby 2.7+
+Since this script builds a changelog by listing the commits since the last release, it
+works best if you are disciplined about squashing PR commits to the minimum number of
+commits necessary (usually one) in order to avoid a noisy changelog.
 
-* [The create\_github\_release Gem](#the-create_github_release-gem)
-  * [Installation](#installation)
-  * [Usage](#usage)
-    * [First release using this script when there were NO prior releases](#first-release-using-this-script-when-there-were-no-prior-releases)
-    * [First release using this script when there were prior releases](#first-release-using-this-script-when-there-were-prior-releases)
-    * [Subsequent releases using this script](#subsequent-releases-using-this-script)
+Tested on Ruby 3.0+
+
+* [Installation](#installation)
+* [Usage](#usage)
+  * [First release using this script when there were NO prior releases](#first-release-using-this-script-when-there-were-no-prior-releases)
+  * [First release using this script when there were prior releases](#first-release-using-this-script-when-there-were-prior-releases)
+  * [Subsequent releases using this script](#subsequent-releases-using-this-script)
+  * [Pre-release versions](#pre-release-versions)
+    * [Creating the first pre-release version for a release](#creating-the-first-pre-release-version-for-a-release)
+    * [Creating subsequent pre-releases](#creating-subsequent-pre-releases)
+    * [Changing the pre-release type](#changing-the-pre-release-type)
+    * [Creating the release after pre-releases](#creating-the-release-after-pre-releases)
   * [After Running create-github-release](#after-running-create-github-release)
-  * [How the changelog is updated](#how-the-changelog-is-updated)
-  * [Limitations](#limitations)
-  * [Development](#development)
-  * [Contributing](#contributing)
-  * [License](#license)
+* [FAQ](#faq)
+  * [What if I want to reverse the changes made by this script?](#what-if-i-want-to-reverse-the-changes-made-by-this-script)
+  * [How is the changelog updated?](#how-is-the-changelog-updated)
+* [Development](#development)
+* [Contributing](#contributing)
+* [License](#license)
 
 ## Installation
 
 Add `create_github_release` as a development dependency in your project's gemspec:
 
 ```ruby
-spec.add_development_dependency 'create_github_release', '~> 0.1'
+spec.add_development_dependency 'create_github_release'
 ```
 
 and then install using `bundle update`.
@@ -45,16 +57,18 @@ This gem installs the `create-guthub-release` command line tool:
 Usage:
 create-github-release --help | RELEASE_TYPE [options]
 
-RELEASE_TYPE must be 'major', 'minor', 'patch', or 'first'
+RELEASE_TYPE must be 'major', 'minor', 'patch', 'pre', 'release', or 'first'
 
 Options:
         --default-branch=BRANCH_NAME Override the default branch
         --release-branch=BRANCH_NAME Override the release branch to create
+    -p, --pre                        Create a pre-release
+    -t, --pre-type=TYPE              Type of pre-release to create (e.g. alpha, beta, etc.)
         --remote=REMOTE_NAME         Use this remote name instead of 'origin'
         --last-release-version=VERSION
                                      Use this version instead `semverify current`
         --next-release-version=VERSION
-                                     Use this version instead `semverify RELEASE_TYPE`
+                                     Use this version instead `semverify next-RELEASE_TYPE`
         --changelog-path=PATH        Use this file instead of CHANGELOG.md
     -q, --[no-]quiet                 Do not show output
     -v, --[no-]verbose               Show extra output
@@ -195,7 +209,85 @@ The `create-github-release` script will do the following:
 See [After running create-github-release](#after-running-create-github-release)
 for instructions for completing your release.
 
-## After Running create-github-release
+### Pre-release versions
+
+This gem allows creation of a release with a pre-release version as [defined in the
+Semver 2.0.0 spec](https://semver.org/#spec-item-9). An example of a pre-release
+version is `1.0.0-beta.1`.
+
+Pre-release versions have a lower precedence than their associated normal version.
+This means the pre-release version sorts before the associated release version. For
+example, `1.0.0-beta.1` comes before `1.0.0`. A pre-release version indicates that
+the version is unstable and might not yet satisfy the intended compatibility
+requirements as denoted by its associated normal version
+
+This gem limits pre-release versions to the form `MAJOR.MINOR.PATCH-PRERELEASE` where
+`PRERELEASE` can ONLY have the following form: `TYPE.DIGITS`. `TYPE` is any text
+string allowed in the Semver 2.0.0 spec and is typically 'alpha', 'beta', 'pre',
+'rc', etc. `DIGITS` is a numeric identifier that does not include leading zeroes.
+
+#### Creating the first pre-release version for a release
+
+Let's say that:
+* The current release version is `1.3.4`
+* You want to create the first pre-release for the next MINOR release
+* You want the pre-release TYPE to be 'alpha'
+
+You would use the following command:
+
+```shell
+create-github-release minor --pre --pre-type=alpha
+```
+
+This would create a release whose version is `1.4.0-alpha.1`.
+
+#### Creating subsequent pre-releases
+
+Let's say you would like to create another alpha pre-release for the `1.4.0` release.
+
+You would use the following command:
+
+```shell
+create-github-release pre
+```
+
+This woould increment the pre-release numeric identifier giving the version is `1.4.0-alpha.2`.
+
+It is only valid to use the `pre` command when the current release is a pre-release
+version. For example, it would not be valid to run `create-github-release pre` if the
+current version is `1.0.0`.
+
+#### Changing the pre-release type
+
+Continuing with the previous example where the current release version is
+`1.4.0-alpha.2`, if you now you want to create a beta pre-release, you would use the
+following command:
+
+```shell
+create-github-release pre --pre-type=beta
+```
+
+This would change the release type and reset the pre-release numeric identifier to
+'1' resulting in the verion `1.4.0-beta.1`
+
+Note that the current release type MUST be lexically less than the new release type
+specified on the command line. This means that if the current version is
+`1.4.0-beta.1`, it would not be valid to change the release type to `alpha` since
+'alpha' <= 'beta'.
+
+#### Creating the release after pre-releases
+
+Now let's say that the current version is `1.4.0-beta.1`. To create release whose version
+is `1.4.0`, use the command:
+
+```shell
+create-github-release release
+```
+
+It is only valid to use the `release` command when the current release version is a
+pre-release version.
+
+### After Running create-github-release
 
 If you want to make additional updates to the ChangeLog or make changes as
 part of the release PR, it is best to do them before running this script. If
@@ -216,15 +308,47 @@ git push
 ```
 
 GitHub will automatically close the PR after the `git push` command. These commands
-are output by `create-github-release` so you do not have to memorize them ;)
+are output by `create-github-release` so you do not have to memorize them.
 
-It is important to use a fast foward marge to ensure that the release tag points
-to the right commit after the merge. GitHub does not allow fast forward merges when
- merging a PR.
+It is important to use a fast foward merge to ensure that the release tag points to
+the right commit after the merge. The GitHub UI does not allow fast forward merges
+when merging a PR.
 
-Finally, publish your gem to rubygems.org with the `rake release` command.
+Finally, publish your gem to rubygems.org with the command:
 
-## How the changelog is updated
+```shell
+rake release:rubygem_push
+```
+
+## FAQ
+
+### What if I want to reverse the changes made by this script?
+
+You will need to delete the Git tag and branch created by this script both remotely and locally.
+
+In your worktree run the following commands:
+
+```shell
+DEFAULT_BRANCH=main
+RELEASE_VERSION=1.0.1
+RELEASE_TAG="v${RELEASE_VERSION}"
+RELEASE_BRANCH="release_${RELEASE_TAG}"
+REMOTE=origin
+
+# Make sure the release branch is not checked out
+git checkout "${DEFAULT_BRANCH}"
+
+# Delete remote branch and tag
+# Deleting the remote branch will automatically close the release PR
+git push "${REMOTE}" --delete "${RELEASE_BRANCH}"
+git push "${REMOTE}" --delete "${RELEASE_TAG}"
+
+# Delete the local branch and tag
+git branch -D "${RELEASE_BRANCH}"
+git tag -D "${RELEASE_TAG}"
+```
+
+### How is the changelog updated?
 
 A release description is generated by listing the commits between the last release
 and the next release.
@@ -266,24 +390,18 @@ The resulting updated changelog file has the following sections:
 2. next release description
 3. body (including past release descriptions)
 
-## Limitations
-
-* Does not work on Windows
-* Has only been tested on MRI Ruby
-*
-
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run
 `rake spec` to run the tests. You can also run `bin/console` for an interactive
 prompt that will allow you to experiment.
 
-To install this gem onto your local machine, run `bundle exec rake install`.
+To install this gem onto your current Ruby environment, run `bundle exec rake install`.
 
 ## Contributing
 
 Bug reports and pull requests are welcome on
-[this project's GitHub issue tracker](https://github.com/main-branch/create_github_release)
+[this project's GitHub page](https://github.com/main-branch/create_github_release)
 
 ## License
 

@@ -3,7 +3,7 @@
 RSpec.describe CreateGithubRelease::ReleaseAssertions do
   let(:release_assertions) { described_class.new(project) }
   let(:project) { CreateGithubRelease::Project.new(options) }
-  let(:options) { CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' } }
+  let(:options) { CreateGithubRelease::CommandLine::Options.new { |o| o.release_type = 'major' } }
 
   describe '#make_assertions' do
     subject { release_assertions.make_assertions }

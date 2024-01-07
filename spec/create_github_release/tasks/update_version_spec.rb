@@ -4,7 +4,7 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateVersion do
   let(:release_type) { 'major' }
   let(:task) { described_class.new(project) }
   let(:project) { CreateGithubRelease::Project.new(options) }
-  let(:options) { CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = release_type } }
+  let(:options) { CreateGithubRelease::CommandLine::Options.new { |o| o.release_type = release_type } }
 
   let(:version_file) { 'lib/my_gem/version.rb' }
 

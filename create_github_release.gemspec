@@ -21,7 +21,8 @@ Gem::Specification.new do |spec|
 
   spec.metadata['homepage_uri'] = spec.homepage
   spec.metadata['source_code_uri'] = spec.homepage
-  spec.metadata['changelog_uri'] = spec.homepage
+  spec.metadata['changelog_uri'] = "https://rubydoc.info/gems/#{spec.name}/#{spec.version}/file/CHANGELOG.md"
+  spec.metadata['documentation_uri'] = "https://rubydoc.info/gems/#{spec.name}/#{spec.version}"
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
@@ -42,10 +43,9 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'redcarpet', '~> 3.5'
   spec.add_development_dependency 'rspec', '~> 3.10'
   spec.add_development_dependency 'rubocop', '~> 1.36'
-  spec.add_development_dependency 'ruby-debug-ide', '~> 0.7'
   spec.add_development_dependency 'simplecov', '~> 0.21'
   spec.add_development_dependency 'simplecov-lcov', '~> 0.8'
-  spec.add_development_dependency 'solargraph', '~> 0.49'
+  # spec.add_development_dependency 'solargraph', '~> 0.49'
   spec.add_development_dependency 'timecop', '~> 0.9'
   spec.add_development_dependency 'yard', '~> 0.9'
   spec.add_development_dependency 'yardstick', '~> 0.9'
