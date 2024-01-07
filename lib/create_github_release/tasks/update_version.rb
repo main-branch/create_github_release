@@ -43,7 +43,10 @@ module CreateGithubRelease
       # @return [void]
       # @api private
       def increment_version
-        `semverify next-#{project.release_type}`
+        command = "semverify next-#{project.release_type}"
+        command += ' --pre' if project.pre
+        command += " --pre-type=#{project.pre_type}" if project.pre_type
+        `#{command}`
         error 'Could not increment version' unless $CHILD_STATUS.success?
       end
 

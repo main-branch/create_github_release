@@ -345,7 +345,7 @@ git push "${REMOTE}" --delete "${RELEASE_TAG}"
 
 # Delete the local branch and tag
 git branch -D "${RELEASE_BRANCH}"
-git tag -D "${RELEASE_TAG}"
+git tag -d "${RELEASE_TAG}"
 ```
 
 ### How is the changelog updated?
