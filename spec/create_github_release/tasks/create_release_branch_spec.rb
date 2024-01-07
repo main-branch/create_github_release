@@ -11,7 +11,7 @@ RSpec.describe CreateGithubRelease::Tasks::CreateReleaseBranch do
     end
   end
 
-  let(:options) { CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' } }
+  let(:options) { CreateGithubRelease::CommandLine::Options.new { |o| o.release_type = 'major' } }
 
   before do
     allow(task).to receive(:`).with(String) { |command| execute_mocked_command(mocked_commands, command) }

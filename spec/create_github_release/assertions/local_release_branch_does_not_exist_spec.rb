@@ -3,7 +3,7 @@
 RSpec.describe CreateGithubRelease::Assertions::LocalReleaseBranchDoesNotExist do
   let(:assertion) { described_class.new(project) }
   let(:options) do
-    CreateGithubRelease::CommandLineOptions.new do |o|
+    CreateGithubRelease::CommandLine::Options.new do |o|
       o.release_type = 'major'
       o.release_branch = 'release-branch'
     end

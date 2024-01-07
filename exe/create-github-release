@@ -3,7 +3,7 @@
 
 require 'create_github_release'
 
-options = CreateGithubRelease::CommandLineParser.new.parse(*ARGV)
+options = CreateGithubRelease::CommandLine::Parser.new.parse(*ARGV)
 pp options if options.verbose
 
 project = CreateGithubRelease::Project.new(options)

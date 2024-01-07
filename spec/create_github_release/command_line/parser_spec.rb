@@ -2,7 +2,7 @@
 
 require 'tmpdir'
 
-RSpec.describe CreateGithubRelease::CommandLineParser do
+RSpec.describe CreateGithubRelease::CommandLine::Parser do
   let(:parser) { described_class.new }
 
   describe '#initialize' do

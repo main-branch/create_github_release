@@ -2,7 +2,7 @@
 
 require 'tmpdir'
 
-RSpec.describe CreateGithubRelease::CommandLineOptions do
+RSpec.describe CreateGithubRelease::CommandLine::Options do
   let(:current_version) { '0.1.0' }
   let(:release_type) { 'major' }
 
@@ -395,7 +395,7 @@ RSpec.describe CreateGithubRelease::CommandLineOptions do
         is_expected.to(
           have_attributes(
             valid?: false,
-            errors: ["--changelog-path='A\u0000B' is not valid"]
+            errors: ["The change log path 'A\u0000B' is not a valid path"]
           )
         )
       end
@@ -404,15 +404,19 @@ RSpec.describe CreateGithubRelease::CommandLineOptions do
     context 'when changelog_path is not a path to a normal file' do
       before do
         options.changelog_path = 'CHANGELOG.md'
+        allow(File).to receive(:exist?).and_call_original
         allow(File).to receive(:exist?).with('CHANGELOG.md').and_return(true)
-        allow(File).to receive(:file?).with('CHANGELOG.md').and_return(false)
+        allow(File).to receive(:expand_path).and_call_original
+        allow(File).to receive(:expand_path).with('CHANGELOG.md').and_return('xxx')
+        allow(File).to receive(:file?).and_call_original
+        allow(File).to receive(:file?).with('xxx').and_return(false)
       end
 
       it do
         is_expected.to(
           have_attributes(
             valid?: false,
-            errors: ["--changelog-path='CHANGELOG.md' must be a regular file"]
+            errors: ["The change log path 'CHANGELOG.md' is not a regular file"]
           )
         )
       end

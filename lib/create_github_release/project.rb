@@ -26,18 +26,18 @@ module CreateGithubRelease
     # used in the block passed to the initializer.
     #
     # @example calling `.new` without a block
-    #   options = CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'minor' }
+    #   options = CreateGithubRelease::CommandLine::Options.new { |o| o.release_type = 'minor' }
     #   project = CreateGithubRelease::Project.new(options)
     #   options.release_type = 'minor'
     #
     # @example calling `.new` with a block
-    #   options = CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'minor' }
+    #   options = CreateGithubRelease::CommandLine::Options.new { |o| o.release_type = 'minor' }
     #   project = CreateGithubRelease::Project.new(options) do |p|
     #     p.release_type = 'major'
     #   end
     #   options.release_type = 'major'
     #
-    # @param options [CreateGithubRelease::CommandLineOptions] the options to initialize the instance with
+    # @param options [CreateGithubRelease::CommandLine::Options] the options to initialize the instance with
     #
     # @yield [self] an initialization block
     # @yieldparam self [CreateGithubRelease::Project] the instance being initialized aka `self`
@@ -55,11 +55,11 @@ module CreateGithubRelease
     # The command line options used to initialize this project
     #
     # @example
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.options == options #=> true
     #
-    # @return [CreateGithubRelease::CommandLineOptions]
+    # @return [CreateGithubRelease::CommandLine::Options]
     #
     attr_reader :options
 
@@ -83,12 +83,12 @@ module CreateGithubRelease
     # Uses the value of `remote` to determine the remote repository to query.
     #
     # @example By default, `default_branch` is based on `git remote show`
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   options.default_branch # => 'main'
     #
     # @example `default_branch` can be set explicitly
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.default_branch = 'master'
     #   project.default_branch #=> 'master'
@@ -115,13 +115,13 @@ module CreateGithubRelease
     # Uses the value of `next_release_version` to determine the tag name.
     #
     # @example By default, `next_release_tag` is based on `next_release_version`
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.next_release_version = '1.0.0'
     #   project.next_relase_tag #=> 'v1.0.0'
     #
     # @example `next_tag` can be set explicitly
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.next_release_tag = 'v1.0.0'
     #   project.next_relase_tag #=> 'v1.0.0'
@@ -141,13 +141,13 @@ module CreateGithubRelease
     # If the next_release_tag does not exist, Date.today is returned.
     #
     # @example By default, `next_release_date` is based on `next_release_tag`
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.next_release_tag = 'v1.0.0'
     #   project.next_release_date #=> #<Date: 2023-02-01 ((2459189j,0s,0n),+0s,2299161j)>
     #
     # @example It can also be set explicitly
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.next_release_date = Date.new(2023, 2, 1)
     #   project.next_release_date #=> #<Date: 2023-02-01 ((2459189j,0s,0n),+0s,2299161j)>
@@ -173,7 +173,7 @@ module CreateGithubRelease
     # `true` if the given tag exists in the local repository
     #
     # @example
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.tag_exist?('v1.0.0') #=> false
     #
@@ -195,12 +195,12 @@ module CreateGithubRelease
     # The version of the next release
     #
     # @example By default, `next_release_version` is based on the value returned by `semverify <release_type> --dry-run`
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.next_release_version #=> '1.0.0'
     #
     # @example It can also be set explicitly
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.next_release_version = '1.0.0
     #   project.next_release_version #=> '1.0.0'
@@ -222,13 +222,13 @@ module CreateGithubRelease
     # Uses the value of `last_release_version` to determine the tag name.
     #
     # @example By default, `last_release_tag` is based on `last_release_version`
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.last_release_version = '0.0.1'
     #   project.last_relase_tag #=> 'v0.0.1'
     #
     # @example `last_release_tag` can be set explicitly
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.last_release_tag = 'v0.0.1'
     #   project.last_relase_tag #=> 'v0.0.1'
@@ -246,12 +246,12 @@ module CreateGithubRelease
     # The version of the last release
     #
     # @example By default, `last_release_version` is based on the value returned by `semverify current`
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.last_release_version #=> '0.0.1'
     #
     # @example It can also be set explicitly
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.last_release_version = '0.0.1
     #   project.last_release_version #=> '0.0.1'
@@ -271,13 +271,13 @@ module CreateGithubRelease
     # The name of the release branch being created
     #
     # @example By default, `release_branch` is based on the value returned by `next_release_tag`
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.next_release_tag = 'v1.0.0'
     #   project.release_branch #=> 'release-v1.0.0'
     #
     # @example It can also be set explicitly
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.next_release_branch = 'release-v1.0.0'
     #   project.next_release_branch #=> 'release-v1.0.0'
@@ -297,7 +297,7 @@ module CreateGithubRelease
     # The URL of the page containing a list of the changes in the release
     #
     # @example By default, `release_log_url` is based on `remote_url`, `last_release_tag`, and `next_release_tag`
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.remote_url = URI.parse('https://github.com/org/repo')
     #   project.last_release_tag = 'v0.0.1'
@@ -305,7 +305,7 @@ module CreateGithubRelease
     #   project.release_log_url #=> #<URI::HTTPS https://github.com/org/repo/compare/v0.0.1..v1.0.0>
     #
     # @example It can also be set explicitly
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.release_log_url = URI.parse('https://github.com/org/repo/compare/v0.0.1..v1.0.0')
     #   project.release_log_url #=> #<URI::HTTPS https://github.com/org/repo/compare/v0.0.1..v1.0.0>
@@ -331,12 +331,12 @@ module CreateGithubRelease
     # @note this must be one of the values accepted by the `semverify` command
     #
     # @example By default, this value comes from the options object
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.release_type #=> 'major'
     #
     # @example It can also be set explicitly
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.release_type = 'patch'
     #   project.release_type #=> 'patch'
@@ -356,12 +356,12 @@ module CreateGithubRelease
     # Set to true if a pre-release is be created
     #
     # @example By default, this value comes from the options object
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major', pre: true, pre_type: 'alpha')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major', pre: true, pre_type: 'alpha')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.pre #=> 'true'
     #
     # @example It can also be set explicitly
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.pre = true
     #   project.pre #=> true
@@ -379,12 +379,12 @@ module CreateGithubRelease
     # Set to the pre-release type to create. For example, "alpha", "beta", "pre", etc
     #
     # @example By default, this value comes from the options object
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major', pre: true, pre_type: 'alpha')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major', pre: true, pre_type: 'alpha')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.pre_type #=> 'alpha'
     #
     # @example It can also be set explicitly
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.pre = true
     #   project.pre_type = 'alpha'
@@ -403,14 +403,14 @@ module CreateGithubRelease
     # The URL of the page containing a list of the changes in the release
     #
     # @example By default, `release_url` is based on `remote_url` and `next_release_tag`
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.remote_url = URI.parse('https://github.com/org/repo')
     #   project.next_release_tag = 'v1.0.0'
     #   project.release_url #=> #<URI::HTTPS https://github.com/org/repo/releases/tag/v1.0.0>
     #
     # @example It can also be set explicitly
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.release_url = URI.parse('https://github.com/org/repo/releases/tag/v1.0.0')
     #   project.release_url #=> #<URI::HTTPS https://github.com/org/repo/releases/tag/v1.0.0>
@@ -428,17 +428,17 @@ module CreateGithubRelease
     # The git remote used to determine the repository url
     #
     # @example By default, 'origin' is used
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.remote #=> 'origin'
     #
     # @example It can also be set in the options
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major', remote: 'upstream')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major', remote: 'upstream')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.remote #=> 'upstream'
     #
     # @example It can also be set explicitly
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.remote = 'upstream'
     #   project.remote #=> 'upstream'
@@ -456,13 +456,13 @@ module CreateGithubRelease
     # The base part of the remote url (e.g. 'https://github.com/')
     #
     # @example By default, this value is based on `remote_url`
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.remote_url = URI.parse('https://github.com/org/repo')
     #   project.remote #=> #<URI::HTTPS https://github.com/>
     #
     # @example It can also be set explicitly
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.remote_base_url = URI.parse('https://github.com/')
     #   project.remote_base_url #=> #<URI::HTTPS https://github.com/>
@@ -480,13 +480,13 @@ module CreateGithubRelease
     # The git remote owner and repository name (e.g. 'org/repo')
     #
     # @example By default, this value is based on `remote_url`
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.remote_url = URI.parse('htps://github.com/org/repo')
     #   project.remote_repository #=> 'org/repo'
     #
     # @example It can also be set explicitly
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.remote_repository = 'org/repo'
     #
@@ -503,12 +503,12 @@ module CreateGithubRelease
     # The URL of the git remote repository (e.g. 'https://github.com/org/repo')
     #
     # @example By default, this value is based on `remote` and the `git remote get-url` command
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.remote #=> #<URI::HTTPS https://github.com/org/repo>
     #
     # @example It can also be set explicitly
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.remote_url = URI.parse('https://github.com/org/repo')
     #   project.remote_url #=> #<URI::HTTPS https://github.com/org/repo>
@@ -533,17 +533,19 @@ module CreateGithubRelease
     # The path relative to the project root where the changelog is located
     #
     # @example By default, this value is 'CHANGELOG.md'
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.changelog_path #=> 'CHANGELOG.md'
     #
     # @example It can also be set in the options
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major', changelog_path: 'docs/CHANGES.txt')
+    #   options = CreateGithubRelease::CommandLine::Options.new(
+    #     release_type: 'major', changelog_path: 'docs/CHANGES.txt'
+    #   )
     #   project = CreateGithubRelease::Project.new(options)
     #   project.remote_repository = 'docs/CHANGES.txt'
     #
     # @example It can also be set explicitly
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.changelog_path = 'docs/CHANGES.txt'
     #   project.remote_repository = 'docs/CHANGES.txt'
@@ -563,7 +565,7 @@ module CreateGithubRelease
     # Calls `git log HEAD <next_release_tag>` to list the changes.
     #
     # @example By default, uses `git log`
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   pp project.changes
     #   [
@@ -572,7 +574,7 @@ module CreateGithubRelease
     #   ]
     #
     # @example It can also be set explicitly
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.changes = 'All the changes'
     #   project.changes #=> 'All the changes'
@@ -598,7 +600,7 @@ module CreateGithubRelease
     # The formatted release description
     #
     # @example
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options) do |p|
     #     p.remote_url = URI.parse('https://github.com/username/repo')
     #     p.last_release_tag = 'v0.1.0'
@@ -649,7 +651,7 @@ module CreateGithubRelease
     #
     #     * e718690 Release v0.1.0 (#3)
     #   CHANGELOG
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options) do |p|
     #     p.changelog_path = changelog_path
     #   end
@@ -682,7 +684,7 @@ module CreateGithubRelease
     # last_release_changelog.
     #
     # @example
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options) do |p|
     #     p.last_release_changelog = <<~CHANGELOG
     #       # Project Changelog
@@ -714,7 +716,7 @@ module CreateGithubRelease
     # Show the project details as a string
     #
     # @example
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   puts projects.to_s
     #   default_branch: main
@@ -766,12 +768,12 @@ module CreateGithubRelease
     # If `true` enables verbose output
     #
     # @example By default, this value is based on the `verbose` option
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major', verbose: true)
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major', verbose: true)
     #   project = CreateGithubRelease::Project.new(options)
     #   project.verbose? #=> true
     #
     # @example It can also be set explicitly
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.verbose = true
     #   project.verbose? #=> true
@@ -791,12 +793,12 @@ module CreateGithubRelease
     # If `true` supresses all output
     #
     # @example By default, this value is based on the `quiet` option
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major', quiet: true)
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major', quiet: true)
     #   project = CreateGithubRelease::Project.new(options)
     #   project.quiet? #=> true
     #
     # @example It can also be set explicitly
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.quiet = true
     #   project.quiet? #=> true
@@ -816,12 +818,12 @@ module CreateGithubRelease
     # true if release_type is 'first' otherwise false
     #
     # @example Returns true if release_type is 'first'
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'first')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'first')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.first_release? #=> true
     #
     # @example Returnss false if release_type is not 'first'
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.first_release? #=> false
     #
@@ -840,7 +842,7 @@ module CreateGithubRelease
     # The SHA of the oldest commit that is an ancestor of HEAD
     #
     # @example
-    #   options = CreateGithubRelease::CommandLineOptions.new(release_type: 'major')
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.first_commit? #=> '1234567'
     #

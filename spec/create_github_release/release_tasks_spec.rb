@@ -3,7 +3,7 @@
 RSpec.describe CreateGithubRelease::ReleaseTasks do
   let(:release_tasks) { described_class.new(project) }
   let(:project) { CreateGithubRelease::Project.new(options) }
-  let(:options) { CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = 'major' } }
+  let(:options) { CreateGithubRelease::CommandLine::Options.new { |o| o.release_type = 'major' } }
 
   describe '#run' do
     subject { release_tasks.run }

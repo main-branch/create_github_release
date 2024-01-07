@@ -24,7 +24,7 @@ module CreateGithubRelease
     #   assertions = CreateGithubRelease::ReleaseAssertions.new(options)
     #   assertions.options # => #<CreateGithubRelease::Options:0x00007f9b0a0b0a00>
     #
-    # @return [CreateGithubRelease::CommandLineOptions]
+    # @return [CreateGithubRelease::CommandLine::Options]
     attr_reader :options
 
     # Create a new instance of ReleaseAssertions

@@ -7,7 +7,7 @@ RSpec.describe CreateGithubRelease::Project do
   let(:release_type) { 'major' }
   let(:project) { described_class.new(options, &project_init_block) }
   let(:project_init_block) { nil }
-  let(:options) { CreateGithubRelease::CommandLineOptions.new { |o| o.release_type = release_type } }
+  let(:options) { CreateGithubRelease::CommandLine::Options.new { |o| o.release_type = release_type } }
 
   before do
     allow_any_instance_of(described_class).to receive(:`).with(String) do |_object, command|
