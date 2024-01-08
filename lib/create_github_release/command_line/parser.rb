@@ -118,28 +118,27 @@ module CreateGithubRelease
         exit 1
       end
 
-      # The command line template as a string
-      # @return [String]
-      # @api private
-      def command_template
-        <<~COMMAND
-          #{File.basename($PROGRAM_NAME)} --help | RELEASE_TYPE [options]
-        COMMAND
-      end
+      # The banner for the option parser
+      BANNER = <<~BANNER.freeze
+        Usage:
+        #{File.basename($PROGRAM_NAME)} --help | RELEASE_TYPE [options]
+
+        Version #{CreateGithubRelease::VERSION}
+
+        RELEASE_TYPE must be 'major', 'minor', 'patch', 'pre', 'release', or 'first'
+
+        Options:
+      BANNER
 
       # Define the options for OptionParser
       # @return [void]
       # @api private
       def define_options
         # @sg-ignore
-        option_parser.banner = "Usage:\n#{command_template}"
-        option_parser.separator ''
-        option_parser.separator "RELEASE_TYPE must be 'major', 'minor', 'patch', 'pre', 'release', or 'first'"
-        option_parser.separator ''
-        option_parser.separator 'Options:'
+        option_parser.banner = BANNER
         %i[
           define_help_option define_default_branch_option define_release_branch_option define_pre_option
-          define_pre_type_option define_remote_option define_last_release_version_option
+          define_pre_type_option define_remote_option define_last_release_version_option define_version_option
           define_next_release_version_option define_changelog_path_option define_quiet_option define_verbose_option
         ].each { |m| send(m) }
       end
@@ -176,7 +175,7 @@ module CreateGithubRelease
       # @return [void]
       # @api private
       def define_verbose_option
-        option_parser.on('-v', '--[no-]verbose', 'Show extra output') do |verbose|
+        option_parser.on('-V', '--[no-]verbose', 'Show extra output') do |verbose|
           options.verbose = verbose
         end
       end
@@ -245,6 +244,16 @@ module CreateGithubRelease
       def define_changelog_path_option
         option_parser.on('--changelog-path=PATH', 'Use this file instead of CHANGELOG.md') do |name|
           options.changelog_path = name
+        end
+      end
+
+      # Define the version option
+      # @return [void]
+      # @api private
+      def define_version_option
+        option_parser.on_tail('-v', '--version', 'Output the version of this script') do
+          puts CreateGithubRelease::VERSION
+          exit 0
         end
       end
     end
