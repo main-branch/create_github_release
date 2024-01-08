@@ -3,6 +3,7 @@
 require 'English'
 require 'optparse'
 require 'create_github_release/command_line/options'
+require 'create_github_release/version'
 
 module CreateGithubRelease
   module CommandLine
