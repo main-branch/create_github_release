@@ -5,6 +5,7 @@
 # It will delete the release branch and tag locally and remotely
 
 require 'create_github_release'
+require 'create_github_release/version'
 
 require 'English'
 require 'optparse'
