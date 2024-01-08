@@ -19,6 +19,7 @@ class Options
   def release_tag = @release_tag ||= "v#{release_version}"
   def release_branch = @release_branch ||= "release-#{release_tag}"
   def current_branch = @current_branch ||= `git rev-parse --abbrev-ref HEAD`.chomp
+  def release_pr = @release_pr ||= `gh pr list --search "head:#{release_branch}" --json number --jq ".[].number"`.chomp
   def remote = @remote ||= 'origin'
 end
 
@@ -78,6 +79,8 @@ class Parser
   BANNER = <<~BANNER.freeze
     Usage:
     #{File.basename($PROGRAM_NAME)} [--help | --version]
+
+    Version #{CreateGithubRelease::VERSION}
 
     This script reverts the effect of running the create-github-release script.
     It must be run in the root directory of the work tree with the release
@@ -139,6 +142,16 @@ def ref_exists?(name)
   $CHILD_STATUS.success?
 end
 
+def revert_release!(options)
+  `gh pr comment #{options.release_pr} --body="Reverting this release using revert-github-release"`
+  `git checkout #{options.default_branch} >/dev/null`
+  `git branch -D #{options.release_branch} >/dev/null`
+  `git tag -d #{options.release_tag} >/dev/null`
+  `git push #{options.remote} --delete #{options.release_branch} >/dev/null`
+  `git push #{options.remote} --delete #{options.release_tag} >/dev/null`
+  `gh release delete #{options.release_tag} --yes >/dev/null`
+end
+
 unless in_work_tree? && in_root_directory?
   warn 'ERROR: Not in the root directory of a Git work tree'
   exit 1
@@ -157,10 +170,6 @@ unless ref_exists?(options.default_branch)
   exit 1
 end
 
-`git checkout #{options.default_branch} >/dev/null`
-`git branch -D #{options.release_branch} >/dev/null`
-`git tag -d #{options.release_tag} >/dev/null`
-`git push #{options.remote} --delete #{options.release_branch} >/dev/null`
-`git push #{options.remote} --delete #{options.release_tag} >/dev/null`
+revert_release!(options)
 
 puts "Reverted release #{options.release_version}"
