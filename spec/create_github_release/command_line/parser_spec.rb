@@ -145,6 +145,14 @@ RSpec.describe CreateGithubRelease::CommandLine::Parser do
         it { is_expected.to have_attributes(release_type: 'patch', quiet: true) }
       end
 
+      context 'when the --version option is given' do
+        let(:args) { ['--version'] }
+        it 'should display the version and then exit' do
+          stub_const('CreateGithubRelease::VERSION', '9.9.9')
+          expect { subject }.to raise_error(SystemExit).and output(/^9.9.9\n$/).to_stdout
+        end
+      end
+
       context 'when the --help options is given' do
         let(:args) { ['--help'] }
         it 'should exit and display the command usage' do
