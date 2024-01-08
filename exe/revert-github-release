@@ -1,0 +1,155 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# This script is used to revert a release that was created with the create-github-release gem
+# It will delete the release branch and tag locally and remotely
+
+require 'create_github_release'
+
+require 'English'
+require 'optparse'
+
+# Options for running this script
+class Options
+  attr_writer :default_branch, :release_version, :release_tag, :release_branch, :current_branch, :remote
+
+  def default_branch = @default_branch ||= 'main'
+  def release_version = @release_version ||= `semverify current`.chomp
+  def release_tag = @release_tag ||= "v#{release_version}"
+  def release_branch = @release_branch ||= "release-#{release_tag}"
+  def current_branch = @current_branch ||= `git rev-parse --abbrev-ref HEAD`.chomp
+  def remote = @remote ||= 'origin'
+end
+
+# Parse the command line options for this script
+class Parser
+  # Create a new command line parser
+  #
+  # @example
+  #   parser = CommandLineParser.new
+  #
+  def initialize
+    @option_parser = OptionParser.new
+    define_options
+    @options = Options.new
+  end
+
+  attr_reader :option_parser, :options
+
+  # Parse the command line arguements returning the options
+  #
+  # @example
+  #   options = Parser.new.parse(*ARGV)
+  #
+  # @param args [Array<String>] the command line arguments
+  #
+  # @return [Options] the options
+  #
+  def parse(*args)
+    begin
+      option_parser.parse!(remaining_args = args.dup)
+    rescue OptionParser::InvalidOption, OptionParser::MissingArgument => e
+      report_errors(e.message)
+    end
+    parse_remaining_args(remaining_args)
+    options
+  end
+
+  private
+
+  # Output an error message and useage to stderr and exit
+  # @return [void]
+  # @api private
+  def report_errors(*errors)
+    warn error_message(errors)
+    exit 1
+  end
+
+  # The command line template as a string
+  # @return [String]
+  # @api private
+  def command_template
+    <<~COMMAND
+      #{File.basename($PROGRAM_NAME)} [--help]
+    COMMAND
+  end
+
+  DESCRIPTION = <<~DESCRIPTION
+    This script reverts the effect of running the create-github-release script.
+    It must be run in the root directory of the work tree with the release
+    branch checked out (which is the state create-github-release leaves you in).
+
+    This script should be run beefore the release PR is merged.
+
+    This script removes the release branch and release tag both in the local
+    repository and on the remote. Deleting the branch on GitHub will close the
+    GitHub PR automatically.
+  DESCRIPTION
+
+  # Define the options for OptionParser
+  # @return [void]
+  # @api private
+  def define_options
+    option_parser.banner = "Usage: #{command_template}"
+    option_parser.separator ''
+    option_parser.separator DESCRIPTION
+    option_parser.separator ''
+    option_parser.separator 'Options:'
+
+    %i[
+      define_help_option
+    ].each { |m| send(m) }
+  end
+
+  # Define the help option
+  # @return [void]
+  # @api private
+  def define_help_option
+    option_parser.on_tail('-h', '--help', 'Show this message') do
+      puts option_parser
+      exit 0
+    end
+  end
+
+  # Parse non-option arguments
+  # @return [void]
+  # @api private
+  def parse_remaining_args(remaining_args)
+    # There should be no remaining args
+    report_errors('Too many args') unless remaining_args.empty?
+  end
+end
+
+def in_work_tree? = `git rev-parse --is-inside-work-tree 2>/dev/null`.chomp == 'true'
+def in_root_directory? = `git rev-parse --show-toplevel 2>/dev/null`.chomp == Dir.pwd
+
+def ref_exists?(name)
+  `git rev-parse --verify #{name} >/dev/null 2>&1`
+  $CHILD_STATUS.success?
+end
+
+unless in_work_tree? && in_root_directory?
+  warn 'ERROR: Not in the root directory of a Git work tree'
+  exit 1
+end
+
+# Parse the command line options
+options = Parser.new.parse(*ARGV)
+
+unless options.release_branch == options.current_branch
+  warn "ERROR: The current branch '#{options.current_branch}' is not the release branch for #{options.release_version}"
+  exit 1
+end
+
+unless ref_exists?(options.default_branch)
+  warn "ERROR: The default branch '#{options.default_branch}' does not exist"
+  exit 1
+end
+
+`git checkout #{options.default_branch} >/dev/null`
+`git branch -D #{options.release_branch} >/dev/null`
+`git tag -d #{options.release_tag} >/dev/null`
+`git push #{options.remote} --delete #{options.release_branch} >/dev/null`
+`git push #{options.remote} --delete #{options.release_tag} >/dev/null`
+
+puts "Reverted release #{options.release_version}"
