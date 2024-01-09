@@ -3,6 +3,28 @@
 
 require 'create_github_release'
 
+# Call method up to max_attempts times until it returns a non-nil value
+#
+# @param method [Proc] the method to call
+# @param max_attempts [Integer] the maximum number of attempts to make
+# @param sleep_time [Float] the number of seconds to sleep between attempts
+#
+# @return [Object] the result of the method call or nil
+#
+# @api public
+#
+def wait_for_non_nil(method, max_attempts: 10, sleep_time: 0.5)
+  result = nil
+
+  max_attempts.times do |n|
+    sleep sleep_time unless n.zero?
+
+    break if (result = method.call)
+  end
+
+  result
+end
+
 options = CreateGithubRelease::CommandLine::Parser.new.parse(*ARGV)
 pp options if options.verbose
 
@@ -23,7 +45,7 @@ puts <<~MESSAGE unless project.quiet
 
   * Get someone to review and approve the release pull request:
 
-  #{project.release_pr_url}
+  #{wait_for_non_nil(-> { project.release_pr_url }, max_attempts: 10, sleep_time: 0.5)}
 
   * Merge the pull request manually from the command line with the following
     commands:
