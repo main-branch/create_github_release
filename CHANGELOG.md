@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.3.4 (2024-01-09)
+
+[Full Changelog](https://github.com/main-branch/create_github_release/compare/v1.3.3..v1.3.4)
+
+Changes since v1.3.3:
+
+* 23a5db6 Document the revert-github-release script in the project README (#59)
+* 0ed4549 Format the output so next steps are easier to read (#58)
+* 5442745 Wait for some time between creating the release PR and searching for it (#56)
+
 ## v1.3.3 (2024-01-08)
 
 [Full Changelog](https://github.com/main-branch/create_github_release/compare/v1.3.2..v1.3.3)
