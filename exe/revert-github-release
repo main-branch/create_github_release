@@ -86,11 +86,13 @@ class Parser
     It must be run in the root directory of the work tree with the release
     branch checked out (which is the state create-github-release leaves you in).
 
-    This script should be run beefore the release PR is merged.
+    This script should be run before the release PR is merged.
 
-    This script removes the release branch and release tag both in the local
-    repository and on the remote. Deleting the branch on GitHub will close the
-    GitHub PR automatically.
+    This script does the following:
+      * Deletes the local and remote release branch
+      * Deletes the local and remote release tag
+      * Deletes the GitHub release object
+      * Closes the GitHub release PR
 
     Options:
   BANNER
@@ -172,4 +174,4 @@ end
 
 revert_release!(options)
 
-puts "Reverted release #{options.release_version}"
+puts "SUCCESS: reverted release '#{options.release_version}'"

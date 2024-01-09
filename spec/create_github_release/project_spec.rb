@@ -981,6 +981,110 @@ RSpec.describe CreateGithubRelease::Project do
     end
   end
 
+  describe '#release_pr_number' do
+    subject { project.release_pr_number }
+
+    let(:release_pr_number) { '123' }
+    let(:remote_url) { 'https://github.com/org/repo' }
+    let(:release_pr_url) { "#{remote_url}/pull/#{release_pr_number}" }
+    let(:next_release_version) { '1.0.0' }
+    let(:next_release_branch) { "release-v#{next_release_version}" }
+
+    context 'when explicitly set' do
+      let(:project_init_block) { ->(p) { p.release_pr_number = release_pr_number } }
+      it { is_expected.to eq(release_pr_number) }
+    end
+
+    context 'when there is no release PR' do
+      let(:project_init_block) { ->(p) { p.next_release_version = next_release_version } }
+
+      let(:mocked_commands) do
+        [
+          MockedCommand.new(
+            %(gh pr list --search "head:#{next_release_branch}" --json number --jq ".[].number"),
+            stdout: "\n"
+          )
+        ]
+      end
+
+      it 'should return nil' do
+        expect(subject).to be_nil
+      end
+    end
+
+    context 'when the release PR is 123' do
+      let(:project_init_block) { ->(p) { p.next_release_version = '1.0.0' } }
+
+      let(:mocked_commands) do
+        [
+          MockedCommand.new(
+            'gh pr list --search "head:release-v1.0.0" --json number --jq ".[].number"',
+            stdout: "#{release_pr_number}\n"
+          )
+        ]
+      end
+
+      it 'should return "123"' do
+        expect(subject).to eq(release_pr_number)
+      end
+    end
+  end
+
+  describe '#release_pr_url' do
+    subject { project.release_pr_url }
+
+    let(:release_pr_number) { '123' }
+    let(:remote_url) { 'https://github.com/org/repo' }
+    let(:release_pr_url) { URI.parse("#{remote_url}/pull/#{release_pr_number}") }
+    let(:next_release_version) { '1.0.0' }
+    let(:next_release_branch) { "release-v#{next_release_version}" }
+
+    context 'when explicitly set' do
+      let(:project_init_block) { ->(p) { p.release_pr_url = release_pr_url } }
+      it { is_expected.to eq(release_pr_url) }
+    end
+
+    context 'when there is not release PR' do
+      let(:project_init_block) do
+        lambda do |p|
+          p.remote_url = remote_url
+          p.next_release_version = next_release_version
+        end
+      end
+
+      let(:mocked_commands) do
+        [
+          MockedCommand.new(
+            %(gh pr list --search "head:#{next_release_branch}" --json number --jq ".[].number"),
+            stdout: "\n"
+          )
+        ]
+      end
+
+      it { is_expected.to be_nil }
+    end
+
+    context 'when the release PR is 123' do
+      let(:project_init_block) do
+        lambda do |p|
+          p.remote_url = remote_url
+          p.next_release_version = next_release_version
+        end
+      end
+
+      let(:mocked_commands) do
+        [
+          MockedCommand.new(
+            %(gh pr list --search "head:#{next_release_branch}" --json number --jq ".[].number"),
+            stdout: "#{release_pr_number}\n"
+          )
+        ]
+      end
+
+      it { is_expected.to eq(release_pr_url) }
+    end
+  end
+
   describe '#to_s' do
     subject { project.to_s }
 
@@ -991,7 +1095,8 @@ RSpec.describe CreateGithubRelease::Project do
         MockedCommand.new('git show --format=format:%aI --quiet "v1.0.0"', stdout: "2023-02-01 00:00:00 -0800\n"),
         MockedCommand.new('semverify current', stdout: "0.1.0\n"),
         MockedCommand.new("git remote get-url 'origin'", stdout: "https://github.com/org/repo.git\n"),
-        MockedCommand.new('git tag --list "v1.0.0"', stdout: "v1.0.0\n")
+        MockedCommand.new('git tag --list "v1.0.0"', stdout: "v1.0.0\n"),
+        MockedCommand.new('gh pr list --search "head:release-v1.0.0" --json number --jq ".[].number"', stdout: "123\n")
       ]
     end
 
@@ -1011,6 +1116,9 @@ RSpec.describe CreateGithubRelease::Project do
       remote_base_url: https://github.com/
       remote_repository: org/repo
       remote_url: https://github.com/org/repo
+      release_pr_number: 123
+      release_pr_url: https://github.com/org/repo/pull/123
+      changelog_path: CHANGELOG.md
       verbose?: false
       quiet?: false
     EXPECTED_RESULT

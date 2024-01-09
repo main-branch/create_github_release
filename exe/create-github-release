@@ -13,18 +13,28 @@ puts unless options.quiet
 CreateGithubRelease::ReleaseTasks.new(project).run
 
 puts <<~MESSAGE unless project.quiet
-  Release '#{project.next_release_tag}' created successfully
-  See the release notes at #{project.release_url}
+  SUCCESS: created release '#{project.next_release_tag}'
 
   Next steps:
-  * Get someone to review and approve the release pull request
-  * Merge the pull request manually from the command line with the following commands:
+
+  * Review the release notes:
+
+  #{project.release_url}
+
+  * Get someone to review and approve the release pull request:
+
+  #{project.release_pr_url}
+
+  * Merge the pull request manually from the command line with the following
+    commands:
 
   git checkout #{project.default_branch}
   git merge --ff-only #{project.release_branch}
   git push
 
-  Wait for the CI build to pass and then release the gem with the following command:
+  * Wait for the CI build to pass on the default branch and then release the
+    gem with the following command:
 
   rake release:rubygem_push
+
 MESSAGE

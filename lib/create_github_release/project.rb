@@ -69,7 +69,7 @@ module CreateGithubRelease
       :release_type, :pre, :pre_type, :release_url, :remote, :remote_base_url,
       :remote_repository, :remote_url, :changelog_path, :changes,
       :next_release_description, :last_release_changelog, :next_release_changelog,
-      :first_commit, :verbose, :quiet
+      :first_commit, :verbose, :quiet, :release_pr_number, :release_pr_url
 
     # attr_writer :first_release
 
@@ -322,6 +322,47 @@ module CreateGithubRelease
         to = next_release_tag
         URI.parse("#{remote_url}/compare/#{from}..#{to}")
       end
+    end
+
+    # @!attribute [rw] release_pr_number
+    #
+    # The number of the pull request created for the release or nil
+    #
+    # The PR must already exist.
+    #
+    # @example
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
+    #   project = CreateGithubRelease::Project.new(options)
+    #   project.release_pr_number #=> '123'
+    #
+    # @return [String, nil]
+    #
+    # @api public
+    #
+    def release_pr_number
+      @release_pr_number ||= begin
+        pr_number = `gh pr list --search "head:#{release_branch}" --json number --jq ".[].number"`.chomp
+        pr_number.empty? ? nil : pr_number
+      end
+    end
+
+    # @!attribute [rw] release_pr_url
+    #
+    # The url of the pull request created for the release or nil
+    #
+    # The PR must already exist.
+    #
+    # @example
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
+    #   project = CreateGithubRelease::Project.new(options)
+    #   project.release_pr_url #=> 'https://github.com/org/repo/pull/123'
+    #
+    # @return [String]
+    #
+    # @api public
+    #
+    def release_pr_url
+      @release_pr_url ||= release_pr_number.nil? ? nil : URI.parse("#{remote_url}/pull/#{release_pr_number}")
     end
 
     # @!attribute [rw] release_type
@@ -713,12 +754,15 @@ module CreateGithubRelease
         CreateGithubRelease::Changelog.new(last_release_changelog, next_release_description).to_s
     end
 
+    # rubocop:disable Metrics/AbcSize
+
     # Show the project details as a string
     #
     # @example
     #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   puts projects.to_s
+    #   first_release: false
     #   default_branch: main
     #   next_release_tag: v1.0.0
     #   next_release_date: 2023-02-01
@@ -733,6 +777,8 @@ module CreateGithubRelease
     #   remote_base_url: https://github.com/
     #   remote_repository: org/repo
     #   remote_url: https://github.com/org/repo
+    #   release_pr_number: 123
+    #   release_pr_url: https://github.com/org/repo/pull/123
     #   changelog_path: CHANGELOG.md
     #   verbose?: false
     #   quiet?: false
@@ -758,10 +804,15 @@ module CreateGithubRelease
         remote_base_url: #{remote_base_url}
         remote_repository: #{remote_repository}
         remote_url: #{remote_url}
+        release_pr_number: #{release_pr_number}
+        release_pr_url: #{release_pr_url}
+        changelog_path: #{changelog_path}
         verbose?: #{verbose?}
         quiet?: #{quiet?}
       OUTPUT
     end
+
+    # rubocop:enable Metrics/AbcSize
 
     # @!attribute [rw] verbose
     #
