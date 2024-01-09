@@ -32,8 +32,8 @@ Tested on Ruby 3.0+
     * [Changing the pre-release type](#changing-the-pre-release-type)
     * [Creating the release after pre-releases](#creating-the-release-after-pre-releases)
   * [After Running create-github-release](#after-running-create-github-release)
+  * [Reverting `create-github-release`](#reverting-create-github-release)
 * [FAQ](#faq)
-  * [What if I want to reverse the changes made by this script?](#what-if-i-want-to-reverse-the-changes-made-by-this-script)
   * [How is the changelog updated?](#how-is-the-changelog-updated)
 * [Development](#development)
 * [Contributing](#contributing)
@@ -320,33 +320,28 @@ Finally, publish your gem to rubygems.org with the command:
 rake release:rubygem_push
 ```
 
+### Reverting `create-github-release`
+
+Should you decide that `create-github-release` was run in error, the `revert-github-release`
+script is provided by this gem to revert the changes made.
+
+This script must be run before the release PR is merged to the default branch.
+
+This script must be run in the root directory of the work tree with the release
+branch checked out. This is the state that the `create-github-release` script leaves
+you in.
+
+This script does the following:
+
+* Adds a comment to the release PR noting that it will be reverted
+* Switches the work tree to the default branch so the release branch can be deleted
+* Deletes the local release branch and release tag
+* Deletes the remote release branch and release tag
+* Deletes the release object created in GitHub for this release
+
+Deleting the release branch on the remote will automatically close the release PR.
+
 ## FAQ
-
-### What if I want to reverse the changes made by this script?
-
-You will need to delete the Git tag and branch created by this script both remotely and locally.
-
-In your worktree run the following commands:
-
-```shell
-DEFAULT_BRANCH=main
-RELEASE_VERSION=1.0.1
-RELEASE_TAG="v${RELEASE_VERSION}"
-RELEASE_BRANCH="release_${RELEASE_TAG}"
-REMOTE=origin
-
-# Make sure the release branch is not checked out
-git checkout "${DEFAULT_BRANCH}"
-
-# Delete remote branch and tag
-# Deleting the remote branch will automatically close the release PR
-git push "${REMOTE}" --delete "${RELEASE_BRANCH}"
-git push "${REMOTE}" --delete "${RELEASE_TAG}"
-
-# Delete the local branch and tag
-git branch -D "${RELEASE_BRANCH}"
-git tag -d "${RELEASE_TAG}"
-```
 
 ### How is the changelog updated?
 
