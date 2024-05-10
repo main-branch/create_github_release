@@ -5,12 +5,12 @@ require 'create_github_release/task_base'
 
 module CreateGithubRelease
   module Tasks
-    # Update the gem version using semverify
+    # Update the gem version using gem-version-boss
     #
     # @api public
     #
     class UpdateVersion < TaskBase
-      # Update the gem version using semverify
+      # Update the gem version using gem-version-boss
       #
       # @example
       #   require 'create_github_release'
@@ -39,28 +39,28 @@ module CreateGithubRelease
 
       private
 
-      # Increment the version using semverify
+      # Increment the version using gem-version-boss
       # @return [void]
       # @api private
       def increment_version
-        command = "semverify next-#{project.release_type}"
+        command = "gem-version-boss next-#{project.release_type}"
         command += ' --pre' if project.pre
         command += " --pre-type=#{project.pre_type}" if project.pre_type
         `#{command}`
         error 'Could not increment version' unless $CHILD_STATUS.success?
       end
 
-      # Return the path the the version file using semverify
+      # Return the path the the version file using gem-version-boss
       # @return [String]
       # @api private
       def version_file
-        output = `semverify file`
-        error 'Semverify could determine the version file' unless $CHILD_STATUS.success?
+        output = `gem-version-boss file`
+        error 'Could determine the version file' unless $CHILD_STATUS.success?
 
         output.lines.last.chomp
       end
 
-      # Identify the version file using semverify and stage the change to it
+      # Identify the version file using gem-version-boss and stage the change to it
       # @return [void]
       # @api private
       def stage_version_file

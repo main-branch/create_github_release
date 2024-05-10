@@ -35,17 +35,16 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
-  spec.add_runtime_dependency 'semverify', '~> 0.3'
+  spec.add_runtime_dependency 'version_boss', '~> 0.1'
 
   spec.add_development_dependency 'bundler-audit', '~> 0.9'
-  spec.add_development_dependency 'debug', '~> 1.7'
-  spec.add_development_dependency 'rake', '~> 13.0'
-  spec.add_development_dependency 'redcarpet', '~> 3.5'
-  spec.add_development_dependency 'rspec', '~> 3.10'
-  spec.add_development_dependency 'rubocop', '~> 1.36'
-  spec.add_development_dependency 'simplecov', '~> 0.21'
+  spec.add_development_dependency 'debug', '~> 1.9'
+  spec.add_development_dependency 'rake', '~> 13.2'
+  spec.add_development_dependency 'redcarpet', '~> 3.6'
+  spec.add_development_dependency 'rspec', '~> 3.13'
+  spec.add_development_dependency 'rubocop', '~> 1.63'
+  spec.add_development_dependency 'simplecov', '~> 0.22'
   spec.add_development_dependency 'simplecov-lcov', '~> 0.8'
-  # spec.add_development_dependency 'solargraph', '~> 0.49'
   spec.add_development_dependency 'timecop', '~> 0.9'
   spec.add_development_dependency 'yard', '~> 0.9'
   spec.add_development_dependency 'yardstick', '~> 0.9'

@@ -15,7 +15,7 @@ class Options
   attr_writer :default_branch, :release_version, :release_tag, :release_branch, :current_branch, :remote
 
   def default_branch = @default_branch ||= 'main'
-  def release_version = @release_version ||= `semverify current`.chomp
+  def release_version = @release_version ||= `gem-version-boss current`.chomp
   def release_tag = @release_tag ||= "v#{release_version}"
   def release_branch = @release_branch ||= "release-#{release_tag}"
   def current_branch = @current_branch ||= `git rev-parse --abbrev-ref HEAD`.chomp

@@ -66,9 +66,9 @@ Options:
     -t, --pre-type=TYPE              Type of pre-release to create (e.g. alpha, beta, etc.)
         --remote=REMOTE_NAME         Use this remote name instead of 'origin'
         --last-release-version=VERSION
-                                     Use this version instead `semverify current`
+                                     Use this version instead `gem-version-boss current`
         --next-release-version=VERSION
-                                     Use this version instead `semverify next-RELEASE_TYPE`
+                                     Use this version instead `gem-version-boss next-RELEASE_TYPE`
         --changelog-path=PATH        Use this file instead of CHANGELOG.md
     -q, --[no-]quiet                 Do not show output
     -v, --[no-]verbose               Show extra output
@@ -90,10 +90,10 @@ If this is to be the first release of this gem follow these instructions.
 For this use case, let's assume the following:
 
 * the default branch is `main` (this is the HEAD branch returned by `git remote show origin`)
-* the current version of the gem is `0.1.0` (as returned by `semverify current`)
+* the current version of the gem is `0.1.0` (as returned by `gem-version-boss current`)
 
 If a different first version number is desired, update the version number in the
-source code making sure that `semverify current` returns the desired version number.
+source code making sure that `gem-version-boss current` returns the desired version number.
 Then commit the change to the default branch on the remote before running this
 script.
 
@@ -131,7 +131,7 @@ create-github-release first
 
 The `create-github-release` script will do the following:
 
-* Determine the next-release version (`v0.1.0`) using `semverify current`
+* Determine the next-release version (`v0.1.0`) using `gem-version-boss current`
 * Update the project's changelog file `CHANGELOG.md`
 * Create a release branch `release-v0.1.0`
 * Commit the changes to the changelog and create a release tag (`v0.1.0`) pointing
@@ -148,7 +148,7 @@ In order to start using `create-github-release` after you have used some other
 method for managing the gem version and creating releases, you need to ensure the
 following prerequisites are met:
 
-1. that `semverify current` is the version of the last release (let's use `1.3.1` as an
+1. that `gem-version-boss current` is the version of the last release (let's use `1.3.1` as an
    example).
 2. that there is a corresponding release tag that points to the last commit on the
    default branch of the previous release. If the last version was `1.3.1`, then
@@ -173,7 +173,7 @@ For this use case, let's assume the following:
 
 * you want to create a `major` release
 * the default branch is `main` (this is the HEAD branch returned by `git remote show origin`)
-* the current version of the gem is `0.1.0` (as returned by `semverify current`)
+* the current version of the gem is `0.1.0` (as returned by `gem-version-boss current`)
 
 The following prerequisites must be met:
 
@@ -196,9 +196,9 @@ create-github-release major
 
 The `create-github-release` script will do the following:
 
-* Determine the last-release version using `semverify current`
-* Determine the next-release version using `semverify RELEASE_TYPE --dry-run`
-* Increment the project's version using `semverify RELEASE_TYPE`
+* Determine the last-release version using `gem-version-boss current`
+* Determine the next-release version using `gem-version-boss RELEASE_TYPE --dry-run`
+* Increment the project's version using `gem-version-boss RELEASE_TYPE`
 * Update the project's changelog file `CHANGELOG.md`
 * Create a release branch `release-v1.0.0`
 * Commit the changes to the version and changelog AND create a release tag (`v1.0.0`) pointing

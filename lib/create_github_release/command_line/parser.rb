@@ -222,7 +222,8 @@ module CreateGithubRelease
       # @return [void]
       # @api private
       def define_last_release_version_option
-        option_parser.on('--last-release-version=VERSION', 'Use this version instead `semverify current`') do |version|
+        option_parser.on('--last-release-version=VERSION',
+                         'Use this version instead `gem-version-boss current`') do |version|
           options.last_release_version = version
         end
       end
@@ -233,7 +234,7 @@ module CreateGithubRelease
       def define_next_release_version_option
         option_parser.on(
           '--next-release-version=VERSION',
-          'Use this version instead `semverify next-RELEASE_TYPE`'
+          'Use this version instead `gem-version-boss next-RELEASE_TYPE`'
         ) do |version|
           options.next_release_version = version
         end
