@@ -42,14 +42,14 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateVersion do
 
       let(:mocked_commands) do
         [
-          MockedCommand.new('semverify next-major --pre', exitstatus: semverify_exitstatus),
-          MockedCommand.new('semverify file', stdout: "#{version_file}\n", exitstatus: semverify_file_exitstatus),
+          MockedCommand.new('gem-version-boss next-major --pre', exitstatus: next_exitstatus),
+          MockedCommand.new('gem-version-boss file', stdout: "#{version_file}\n", exitstatus: file_exitstatus),
           MockedCommand.new("git add \"#{version_file}\"", exitstatus: git_exitstatus)
         ]
       end
 
-      let(:semverify_exitstatus) { 0 }
-      let(:semverify_file_exitstatus) { 0 }
+      let(:next_exitstatus) { 0 }
+      let(:file_exitstatus) { 0 }
       let(:git_exitstatus) { 0 }
 
       it 'should increment the version with the --pre flag' do
@@ -63,14 +63,14 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateVersion do
 
       let(:mocked_commands) do
         [
-          MockedCommand.new('semverify next-major --pre --pre-type=alpha', exitstatus: semverify_exitstatus),
-          MockedCommand.new('semverify file', stdout: "#{version_file}\n", exitstatus: semverify_file_exitstatus),
+          MockedCommand.new('gem-version-boss next-major --pre --pre-type=alpha', exitstatus: next_exitstatus),
+          MockedCommand.new('gem-version-boss file', stdout: "#{version_file}\n", exitstatus: file_exitstatus),
           MockedCommand.new("git add \"#{version_file}\"", exitstatus: git_exitstatus)
         ]
       end
 
-      let(:semverify_exitstatus) { 0 }
-      let(:semverify_file_exitstatus) { 0 }
+      let(:next_exitstatus) { 0 }
+      let(:file_exitstatus) { 0 }
       let(:git_exitstatus) { 0 }
 
       it 'should increment the version with the --pre and --pre-type=alpha args' do
@@ -84,14 +84,14 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateVersion do
 
       let(:mocked_commands) do
         [
-          MockedCommand.new('semverify next-pre --pre-type=beta', exitstatus: semverify_exitstatus),
-          MockedCommand.new('semverify file', stdout: "#{version_file}\n", exitstatus: semverify_file_exitstatus),
+          MockedCommand.new('gem-version-boss next-pre --pre-type=beta', exitstatus: next_exitstatus),
+          MockedCommand.new('gem-version-boss file', stdout: "#{version_file}\n", exitstatus: file_exitstatus),
           MockedCommand.new("git add \"#{version_file}\"", exitstatus: git_exitstatus)
         ]
       end
 
-      let(:semverify_exitstatus) { 0 }
-      let(:semverify_file_exitstatus) { 0 }
+      let(:next_exitstatus) { 0 }
+      let(:file_exitstatus) { 0 }
       let(:git_exitstatus) { 0 }
 
       it 'should increment the version with the pre release type and --pre-type=alpha arg' do
@@ -102,35 +102,35 @@ RSpec.describe CreateGithubRelease::Tasks::UpdateVersion do
     context 'when this is NOT the first release' do
       let(:mocked_commands) do
         [
-          MockedCommand.new('semverify next-major', exitstatus: semverify_exitstatus),
-          MockedCommand.new('semverify file', stdout: "#{version_file}\n", exitstatus: semverify_file_exitstatus),
+          MockedCommand.new('gem-version-boss next-major', exitstatus: next_exitstatus),
+          MockedCommand.new('gem-version-boss file', stdout: "#{version_file}\n", exitstatus: file_exitstatus),
           MockedCommand.new("git add \"#{version_file}\"", exitstatus: git_exitstatus)
         ]
       end
 
-      let(:semverify_exitstatus) { 0 }
-      let(:semverify_file_exitstatus) { 0 }
+      let(:next_exitstatus) { 0 }
+      let(:file_exitstatus) { 0 }
       let(:git_exitstatus) { 0 }
 
-      context 'when semverify and git add succeed' do
+      context 'when gem-version-boss and git add succeed' do
         it 'should succeed' do
           expect { subject }.not_to raise_error
         end
       end
 
-      context 'when semverify fails to increment the version' do
-        let(:semverify_exitstatus) { 1 }
+      context 'when gem-version-boss fails to increment the version' do
+        let(:next_exitstatus) { 1 }
         it 'should fail' do
           expect { subject }.to raise_error(SystemExit)
           expect(stderr).to start_with('ERROR: Could not increment version')
         end
       end
 
-      context 'when `semverify file` fails' do
-        let(:semverify_file_exitstatus) { 1 }
+      context 'when `gem-version-boss file` fails' do
+        let(:file_exitstatus) { 1 }
         it 'should fail' do
           expect { subject }.to raise_error(SystemExit)
-          expect(stderr).to start_with('ERROR: Semverify could determine the version file')
+          expect(stderr).to start_with('ERROR: Could determine the version file')
         end
       end
 

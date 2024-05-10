@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'semverify'
+require 'version_boss'
 require 'uri'
 
 module CreateGithubRelease
@@ -194,7 +194,7 @@ module CreateGithubRelease
     #
     # The version of the next release
     #
-    # @example By default, `next_release_version` is based on the value returned by `semverify <release_type> --dry-run`
+    # @example By default, `next_release_version` is based on `gem-version-boss <release_type> --dry-run`
     #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.next_release_version #=> '1.0.0'
@@ -207,7 +207,7 @@ module CreateGithubRelease
     #
     # @return [String]
     #
-    # @raise [RuntimeError] if the semverify command fails
+    # @raise [RuntimeError] if the gem-version-boss command fails
     #
     # @api public
     #
@@ -245,7 +245,7 @@ module CreateGithubRelease
     #
     # The version of the last release
     #
-    # @example By default, `last_release_version` is based on the value returned by `semverify current`
+    # @example By default, `last_release_version` is based on the value returned by `gem-version-boss current`
     #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
     #   project = CreateGithubRelease::Project.new(options)
     #   project.last_release_version #=> '0.0.1'
@@ -258,7 +258,7 @@ module CreateGithubRelease
     #
     # @return [String]
     #
-    # @raise [RuntimeError] if the semverify command fails
+    # @raise [RuntimeError] if the gem-version-boss command fails
     #
     # @api public
     #
@@ -284,7 +284,7 @@ module CreateGithubRelease
     #
     # @return [String]
     #
-    # @raise [RuntimeError] if the semverify command fails
+    # @raise [RuntimeError] if the gem-version-boss command fails
     #
     # @api public
     #
@@ -312,7 +312,7 @@ module CreateGithubRelease
     #
     # @return [URI]
     #
-    # @raise [RuntimeError] if the semverify command fails
+    # @raise [RuntimeError] if the gem-version-boss command fails
     #
     # @api public
     #
@@ -369,7 +369,7 @@ module CreateGithubRelease
     #
     # The type of the release being created (e.g. 'major', 'minor', 'patch')
     #
-    # @note this must be one of the values accepted by the `semverify` command
+    # @note this must be one of the values accepted by the `gem-version-boss` command
     #
     # @example By default, this value comes from the options object
     #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
@@ -913,22 +913,22 @@ module CreateGithubRelease
 
     private
 
-    # The current version of the project as determined by semverify
+    # The current version of the project as determined by gem-version-boss
     # @return [String] The current version of the project
     # @api private
     def current_version
-      output = `semverify current`
-      raise 'Could not determine current version using semverify' unless $CHILD_STATUS.success?
+      output = `gem-version-boss current`
+      raise 'Could not determine current version using gem-version-boss' unless $CHILD_STATUS.success?
 
       output.lines.last.chomp
     end
 
-    # The next version of the project as determined by semverify and release_type
+    # The next version as determined by gem-version-boss and release_type
     # @return [String] The next version of the project
     # @api private
     def next_version
       output = `#{next_version_cmd}`
-      raise 'Could not determine next version using semverify' unless $CHILD_STATUS.success?
+      raise 'Could not determine next version using gem-version-boss' unless $CHILD_STATUS.success?
 
       output.lines.last.chomp
     end
@@ -937,7 +937,7 @@ module CreateGithubRelease
     # @return [String]
     # @api private
     def next_version_cmd
-      cmd = "semverify next-#{release_type}"
+      cmd = "gem-version-boss next-#{release_type}"
       cmd << ' --pre' if pre
       cmd << " --pre-type=#{pre_type}" if pre_type
       cmd << ' --dry-run'

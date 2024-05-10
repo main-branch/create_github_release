@@ -37,12 +37,12 @@ RSpec.describe CreateGithubRelease::Project do
       end
     end
 
-    context "when release_type is 'first' and 'semverify current' returns 0.0.1" do
+    context "when release_type is 'first' and 'gem-version-boss current' returns 0.0.1" do
       let(:release_type) { 'first' }
 
       subject { project }
 
-      let(:mocked_commands) { [MockedCommand.new('semverify current', stdout: "0.0.1\n")] }
+      let(:mocked_commands) { [MockedCommand.new('gem-version-boss current', stdout: "0.0.1\n")] }
 
       it do
         is_expected.to(
@@ -200,8 +200,8 @@ RSpec.describe CreateGithubRelease::Project do
     context 'when not explicitly set and not set in options' do
       context 'when this is the first release' do
         let(:release_type) { 'first' }
-        let(:mocked_commands) { [MockedCommand.new('semverify current', stdout: "1.0.0\n")] }
-        it "should determine the version using 'semverify current'" do
+        let(:mocked_commands) { [MockedCommand.new('gem-version-boss current', stdout: "1.0.0\n")] }
+        it "should determine the version using 'gem-version-boss current'" do
           expect(subject).to eq('1.0.0')
         end
       end
@@ -217,7 +217,7 @@ RSpec.describe CreateGithubRelease::Project do
 
           let(:mocked_commands) do
             [
-              MockedCommand.new('semverify next-pre --pre --dry-run', stdout: "1.0.0-alpha.2\n")
+              MockedCommand.new('gem-version-boss next-pre --pre --dry-run', stdout: "1.0.0-alpha.2\n")
             ]
           end
 
@@ -235,7 +235,7 @@ RSpec.describe CreateGithubRelease::Project do
 
           let(:mocked_commands) do
             [
-              MockedCommand.new('semverify next-pre --pre --pre-type=beta --dry-run', stdout: "1.0.0-beta.1\n")
+              MockedCommand.new('gem-version-boss next-pre --pre --pre-type=beta --dry-run', stdout: "1.0.0-beta.1\n")
             ]
           end
 
@@ -248,7 +248,7 @@ RSpec.describe CreateGithubRelease::Project do
 
         let(:mocked_commands) do
           [
-            MockedCommand.new('semverify next-release --dry-run', stdout: "1.0.0\n")
+            MockedCommand.new('gem-version-boss next-release --dry-run', stdout: "1.0.0\n")
           ]
         end
 
@@ -256,22 +256,22 @@ RSpec.describe CreateGithubRelease::Project do
       end
 
       context 'when release_type is major' do
-        context 'when the semverify command succeeds' do
-          let(:mocked_commands) { [MockedCommand.new('semverify next-major --dry-run', stdout: "1.0.0\n")] }
+        context 'when the gem-version-boss command succeeds' do
+          let(:mocked_commands) { [MockedCommand.new('gem-version-boss next-major --dry-run', stdout: "1.0.0\n")] }
           it { is_expected.to eq('1.0.0') }
         end
 
-        context 'when the semverify command succeeds with extra output' do
+        context 'when the gem-version-boss command succeeds with extra output' do
           let(:mocked_commands) do
             [
-              MockedCommand.new('semverify next-major --dry-run', stdout: "Resolving dependencies...\n1.0.0\n")
+              MockedCommand.new('gem-version-boss next-major --dry-run', stdout: "Resolving dependencies...\n1.0.0\n")
             ]
           end
           it { is_expected.to eq('1.0.0') }
         end
 
-        context 'when the semverify command fails' do
-          let(:mocked_commands) { [MockedCommand.new('semverify next-major --dry-run', exitstatus: 1)] }
+        context 'when the gem-version-boss command fails' do
+          let(:mocked_commands) { [MockedCommand.new('gem-version-boss next-major --dry-run', exitstatus: 1)] }
           it 'should raise a RuntimeError' do
             expect { subject }.to raise_error(RuntimeError)
           end
@@ -287,7 +287,8 @@ RSpec.describe CreateGithubRelease::Project do
 
           let(:mocked_commands) do
             [
-              MockedCommand.new('semverify next-major --pre --pre-type=alpha --dry-run', stdout: "1.0.0-alpha.1\n")
+              MockedCommand.new('gem-version-boss next-major --pre --pre-type=alpha --dry-run',
+                                stdout: "1.0.0-alpha.1\n")
             ]
           end
 
@@ -348,28 +349,28 @@ RSpec.describe CreateGithubRelease::Project do
 
       context 'when this is the first release' do
         let(:release_type) { 'first' }
-        let(:mocked_commands) { [MockedCommand.new('semverify current', stdout: '0.0.1')] }
+        let(:mocked_commands) { [MockedCommand.new('gem-version-boss current', stdout: '0.0.1')] }
         it 'should return an empty string' do
           expect(subject).to eq('')
         end
       end
 
-      context 'when the semverify command succeeds' do
-        let(:mocked_commands) { [MockedCommand.new('semverify current', stdout: "0.0.1\n")] }
+      context 'when the gem-version-boss command succeeds' do
+        let(:mocked_commands) { [MockedCommand.new('gem-version-boss current', stdout: "0.0.1\n")] }
         it { is_expected.to eq('0.0.1') }
       end
 
-      context 'when the semverify command succeeds with extra output' do
+      context 'when the gem-version-boss command succeeds with extra output' do
         let(:mocked_commands) do
           [
-            MockedCommand.new('semverify current', stdout: "Resolving dependencies...\n0.0.1\n")
+            MockedCommand.new('gem-version-boss current', stdout: "Resolving dependencies...\n0.0.1\n")
           ]
         end
         it { is_expected.to eq('0.0.1') }
       end
 
-      context 'when the semverify command fails' do
-        let(:mocked_commands) { [MockedCommand.new('semverify current', exitstatus: '1')] }
+      context 'when the gem-version-boss command fails' do
+        let(:mocked_commands) { [MockedCommand.new('gem-version-boss current', exitstatus: '1')] }
         it 'should raise a RuntimeError' do
           expect { subject }.to raise_error(RuntimeError)
         end
@@ -1091,9 +1092,9 @@ RSpec.describe CreateGithubRelease::Project do
     let(:mocked_commands) do
       [
         MockedCommand.new("git remote show 'origin'", stdout: "  HEAD branch: main\n"),
-        MockedCommand.new('semverify next-major --dry-run', stdout: "1.0.0\n"),
+        MockedCommand.new('gem-version-boss next-major --dry-run', stdout: "1.0.0\n"),
         MockedCommand.new('git show --format=format:%aI --quiet "v1.0.0"', stdout: "2023-02-01 00:00:00 -0800\n"),
-        MockedCommand.new('semverify current', stdout: "0.1.0\n"),
+        MockedCommand.new('gem-version-boss current', stdout: "0.1.0\n"),
         MockedCommand.new("git remote get-url 'origin'", stdout: "https://github.com/org/repo.git\n"),
         MockedCommand.new('git tag --list "v1.0.0"', stdout: "v1.0.0\n"),
         MockedCommand.new('gh pr list --search "head:release-v1.0.0" --json number --jq ".[].number"', stdout: "123\n")
