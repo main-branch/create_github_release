@@ -2,5 +2,5 @@
 
 module CreateGithubRelease
   # The version of this gem
-  VERSION = '1.3.4'
+  VERSION = '1.4.0'
 end
