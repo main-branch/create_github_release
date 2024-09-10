@@ -140,8 +140,18 @@ module CreateGithubRelease
         %i[
           define_help_option define_default_branch_option define_release_branch_option define_pre_option
           define_pre_type_option define_remote_option define_last_release_version_option define_version_option
-          define_next_release_version_option define_changelog_path_option define_quiet_option define_verbose_option
+          define_next_release_version_option define_release_pr_label_option define_changelog_path_option
+          define_quiet_option define_verbose_option
         ].each { |m| send(m) }
+      end
+
+      # Define the release_pr_label option which requires a value
+      # @return [void]
+      # @api private
+      def define_release_pr_label_option
+        option_parser.on('--release-pr-label=LABEL', 'The label to apply to the release pull request') do |label|
+          options.release_pr_label = label
+        end
       end
 
       # Define the pre option

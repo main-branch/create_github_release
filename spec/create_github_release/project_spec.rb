@@ -457,6 +457,23 @@ RSpec.describe CreateGithubRelease::Project do
     end
   end
 
+  describe '#release_pr_label' do
+    subject { project.release_pr_label }
+
+    context 'when the release_pr_label is not explicitly set' do
+      it 'should return options.release_type' do
+        expect(subject).to be_nil
+      end
+    end
+
+    context 'when the release_pr_label is explicitly set' do
+      let(:project_init_block) { ->(p) { p.release_pr_label = 'release' } }
+      it 'should return the set release pr label' do
+        expect(subject).to eq('release')
+      end
+    end
+  end
+
   describe '#release_url' do
     subject { project.release_url }
 

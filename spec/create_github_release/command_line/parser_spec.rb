@@ -38,6 +38,7 @@ RSpec.describe CreateGithubRelease::CommandLine::Parser do
               remote: nil,
               last_release_version: nil,
               next_release_version: nil,
+              release_pr_label: nil,
               changelog_path: nil,
               quiet: false,
               verbose: false
@@ -83,6 +84,7 @@ RSpec.describe CreateGithubRelease::CommandLine::Parser do
               remote: nil,
               last_release_version: nil,
               next_release_version: nil,
+              release_pr_label: nil,
               changelog_path: nil,
               quiet: false,
               verbose: false
@@ -128,6 +130,7 @@ RSpec.describe CreateGithubRelease::CommandLine::Parser do
               remote: nil,
               last_release_version: nil,
               next_release_version: nil,
+              release_pr_label: nil,
               changelog_path: nil,
               quiet: false,
               verbose: false
@@ -138,6 +141,11 @@ RSpec.describe CreateGithubRelease::CommandLine::Parser do
         it 'should be valid and have no errors' do
           expect(subject).to(have_attributes(valid?: true, errors: []))
         end
+      end
+
+      context 'when the --release-pr-label option is given' do
+        let(:args) { ['patch', '--release-pr-label=release'] }
+        it { is_expected.to have_attributes(release_type: 'patch', release_pr_label: 'release') }
       end
 
       context 'when the --quiet option is given' do

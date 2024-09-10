@@ -48,12 +48,29 @@ module CreateGithubRelease
         print 'Creating GitHub pull request...'
         tag = project.next_release_tag
         default_branch = project.default_branch
-        `gh pr create --title 'Release #{tag}' --body-file '#{path}' --base '#{default_branch}'`
+        `#{command(tag, path, default_branch)}`
         if $CHILD_STATUS.success?
           puts 'OK'
         else
           error 'Could not create release pull request'
         end
+      end
+
+      # The command to create the release pull request
+      # @param tag [String] The tag for the release
+      # @param path [String] The path to the file with the PR body
+      # @param default_branch [String] The default branch for the repository
+      # @return [String] The command to create the release pull request
+      # @api private
+      def command(tag, path, default_branch)
+        command = [
+          'gh', 'pr', 'create',
+          '--title', "'Release #{tag}'",
+          '--body-file', "'#{path}'",
+          '--base', "'#{default_branch}'"
+        ]
+        command += ['--label', "'#{project.release_pr_label}'"] if project.release_pr_label
+        command.join(' ')
       end
 
       # Write the changelog to a new temporary file

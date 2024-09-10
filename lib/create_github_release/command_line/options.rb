@@ -63,6 +63,13 @@ module CreateGithubRelease
       #   @return [String]
       #   @api public
 
+      # @!attribute release_pr_label [rw] the label to apply to the release pull request
+      #   @example
+      #     options = CreateGithubRelease::CommandLine::Options.new(release_pr_label: 'release')
+      #     options.release_pr_label #=> 'release'
+      #   @return [String]
+      #   @api public
+
       # @attribute changelog_path [rw] the path to the changelog file
       #   @example
       #     options = CreateGithubRelease::CommandLine::Options.new(changelog_path: 'CHANGELOG.md')

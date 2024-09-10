@@ -69,7 +69,8 @@ module CreateGithubRelease
       :release_type, :pre, :pre_type, :release_url, :remote, :remote_base_url,
       :remote_repository, :remote_url, :changelog_path, :changes,
       :next_release_description, :last_release_changelog, :next_release_changelog,
-      :first_commit, :verbose, :quiet, :release_pr_number, :release_pr_url
+      :first_commit, :verbose, :quiet, :release_pr_number, :release_pr_url,
+      :release_pr_label
 
     # attr_writer :first_release
 
@@ -290,6 +291,34 @@ module CreateGithubRelease
     #
     def release_branch
       @release_branch ||= options.release_branch || "release-#{next_release_tag}"
+    end
+
+    # @!attribute [rw] release_pr_label
+    #
+    # The name of the label to apply to the release pull request
+    #
+    # @example By default, `release_pr_label` is nil indicating no label should be applied
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
+    #   project = CreateGithubRelease::Project.new(options)
+    #   project.release_pr_label #=> nil
+    #
+    # @example Set to 'release'
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major', release_pr_label: 'release')
+    #   project = CreateGithubRelease::Project.new(options)
+    #   project.release_pr_label #=> 'release'
+    #
+    # @example It can also be set explicitly
+    #   options = CreateGithubRelease::CommandLine::Options.new(release_type: 'major')
+    #   project = CreateGithubRelease::Project.new(options)
+    #   project.release_pr_label = 'release' # could be set to nil to remove the label
+    #   project.release_pr_label #=> 'release'
+    #
+    # @return [String, nil]
+    #
+    # @api public
+    #
+    def release_pr_label
+      @release_pr_label ||= options.release_pr_label || nil
     end
 
     # @!attribute [rw] release_log_url
