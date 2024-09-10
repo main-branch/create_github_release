@@ -277,7 +277,10 @@ RSpec.describe CreateGithubRelease::CommandLine::Options do
           before { options.pre = true }
 
           it 'is expected NOT to be valid' do
-            expect(subject).to have_attributes(valid?: false, errors: [/^--pre can only /, /^--pre-type can only /])
+            expect(subject).to have_attributes(
+              valid?: false,
+              errors: match_array([/^--pre can only /, /^--pre-type can only /])
+            )
           end
         end
 
@@ -297,7 +300,10 @@ RSpec.describe CreateGithubRelease::CommandLine::Options do
           before { options.pre = true }
 
           it 'is expected NOT to be valid' do
-            expect(subject).to have_attributes(valid?: false, errors: [/^--pre can only /, /^--pre-type can only /])
+            expect(subject).to have_attributes(
+              valid?: false,
+              errors: match_array([/^--pre can only /, /^--pre-type can only /])
+            )
           end
         end
 
@@ -305,7 +311,9 @@ RSpec.describe CreateGithubRelease::CommandLine::Options do
           before { options.pre = false }
 
           it 'is expected NOT to be valid' do
-            expect(subject).to have_attributes(valid?: false, errors: [/^--pre-type can only /])
+            expect(subject).to have_attributes(
+              valid?: false, errors: [/^--pre-type can only /]
+            )
           end
         end
       end
