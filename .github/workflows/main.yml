@@ -48,12 +48,11 @@ jobs:
           ruby-version: 3.1
           bundler-cache: true
 
-      - name: Run tests
-        run: bundle exec rake spec
 
       - name: Report test coverage
-        uses: paambaati/codeclimate-action@v3.2.0
+        uses: paambaati/codeclimate-action@v9
         env:
           CC_TEST_REPORTER_ID: 89aff99f016ae5eb4bc5437c5e1b1ea6ffaacd8b20cea6b4873288a822bdb9ee
         with:
+          coverageCommand: bundle exec rake spec
           coverageLocations: ${{github.workspace}}/coverage/lcov/*.lcov:lcov
