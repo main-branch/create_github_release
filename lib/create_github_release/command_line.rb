@@ -32,7 +32,7 @@ module CreateGithubRelease
     # @return [Array<Symbol>]
     ALLOWED_OPTIONS = %i[
       release_type pre pre_type default_branch release_branch remote last_release_version
-      next_release_version changelog_path quiet verbose
+      next_release_version release_pr_label changelog_path quiet verbose
     ].freeze
   end
 end

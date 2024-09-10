@@ -8,12 +8,14 @@ RSpec.describe CreateGithubRelease::Tasks::CreateReleasePullRequest do
   let(:default_branch) { 'main' }
   let(:next_release_tag) { 'v1.0.0' }
   let(:next_release_description) { '<imagine release description here>' }
+  let(:release_pr_label) { nil }
 
   let(:project) do
     CreateGithubRelease::Project.new(options) do |p|
       p.default_branch = default_branch
       p.next_release_tag = next_release_tag
       p.next_release_description = next_release_description
+      p.release_pr_label = release_pr_label
     end
   end
 
@@ -56,7 +58,35 @@ RSpec.describe CreateGithubRelease::Tasks::CreateReleasePullRequest do
       ]
     end
 
+    context 'when the release pull requlest is created with a label' do
+      let(:release_pr_label) { 'release' }
+
+      let(:mocked_commands) do
+        [
+          MockedCommand.new(
+            "gh pr create --title 'Release #{next_release_tag}' --body-file '#{tmp_file}' " \
+            "--base '#{default_branch}' --label 'release'",
+            stdout: '',
+            exitstatus: gh_exitstatus
+          )
+        ]
+      end
+
+      before do
+        expect(pr_body_file).to receive(:write).with(expected_pr_body)
+        expect(pr_body_file).to receive(:close)
+      end
+
+      let(:gh_exitstatus) { 0 }
+
+      it 'should succeed' do
+        expect { subject }.not_to raise_error
+      end
+    end
+
     context 'when the release pull request is created' do
+      let(:release_pr_label) { nil }
+
       before do
         expect(pr_body_file).to receive(:write).with(expected_pr_body)
         expect(pr_body_file).to receive(:close)
