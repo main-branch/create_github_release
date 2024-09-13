@@ -8,6 +8,6 @@ RSpec.describe CreateGithubRelease::Change do
   describe '#initialize' do
     subject { change }
 
-    it { is_expected.to(have_attributes(sha: sha, subject: subject_string)) }
+    it { is_expected.to(have_attributes(sha:, subject: subject_string)) }
   end
 end

@@ -23,7 +23,7 @@ RSpec.describe CreateGithubRelease::Assertions::GitCommandExists do
 
     let(:mocked_commands) do
       [
-        MockedCommand.new('which git > /dev/null 2>&1', exitstatus: exitstatus)
+        MockedCommand.new('which git > /dev/null 2>&1', exitstatus:)
       ]
     end
 

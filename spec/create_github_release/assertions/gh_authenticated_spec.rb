@@ -23,7 +23,7 @@ RSpec.describe CreateGithubRelease::Assertions::GhAuthenticated do
 
     let(:mocked_commands) do
       [
-        MockedCommand.new('gh auth status 2>&1', stdout: stdout, exitstatus: exitstatus)
+        MockedCommand.new('gh auth status 2>&1', stdout:, exitstatus:)
       ]
     end
 
