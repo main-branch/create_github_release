@@ -28,7 +28,7 @@ RSpec.describe CreateGithubRelease::Assertions::BundleIsUpToDate do
 
       let(:mocked_commands) do
         [
-          MockedCommand.new('bundle update --quiet', exitstatus: exitstatus)
+          MockedCommand.new('bundle update --quiet', exitstatus:)
         ]
       end
 
@@ -55,7 +55,7 @@ RSpec.describe CreateGithubRelease::Assertions::BundleIsUpToDate do
 
       let(:mocked_commands) do
         [
-          MockedCommand.new('bundle install --quiet', exitstatus: exitstatus)
+          MockedCommand.new('bundle install --quiet', exitstatus:)
         ]
       end
 

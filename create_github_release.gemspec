@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
   DESCRIPTION
   spec.homepage = 'https://github.com/main-branch/create_github_release'
   spec.license = 'MIT'
-  spec.required_ruby_version = '>= 3.0.0'
+  spec.required_ruby_version = '>= 3.1.0'
 
   spec.metadata['allowed_push_host'] = 'https://rubygems.org'
 
@@ -34,23 +34,28 @@ Gem::Specification.new do |spec|
   spec.bindir = 'exe'
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
+  spec.requirements = [
+    'Platform: Mac, Linux, or Windows',
+    'Ruby: MRI 3.1 or later, TruffleRuby 24 or later, or JRuby 9.4 or later'
+  ]
 
   spec.add_dependency 'version_boss', '~> 0.1'
 
   spec.add_development_dependency 'bundler-audit', '~> 0.9'
-  spec.add_development_dependency 'debug', '~> 1.9'
+  # spec.add_development_dependency 'debug', '~> 1.9'
   spec.add_development_dependency 'rake', '~> 13.2'
-  spec.add_development_dependency 'redcarpet', '~> 3.6'
   spec.add_development_dependency 'rspec', '~> 3.13'
-  spec.add_development_dependency 'rubocop', '~> 1.63'
+  spec.add_development_dependency 'rubocop', '~> 1.66'
   spec.add_development_dependency 'simplecov', '~> 0.22'
   spec.add_development_dependency 'simplecov-lcov', '~> 0.8'
+  spec.add_development_dependency 'simplecov-rspec', '~> 0.2'
   spec.add_development_dependency 'timecop', '~> 0.9'
-  spec.add_development_dependency 'yard', '~> 0.9'
-  spec.add_development_dependency 'yardstick', '~> 0.9'
 
-  # For more information and examples about making a new gem, check out our
-  # guide at: https://bundler.io/guides/creating_gem.html
+  unless RUBY_PLATFORM == 'java'
+    spec.add_development_dependency 'redcarpet', '~> 3.6'
+    spec.add_development_dependency 'yard', '~> 0.9', '>= 0.9.28'
+    spec.add_development_dependency 'yardstick', '~> 0.9'
+  end
 
   spec.metadata['rubygems_mfa_required'] = 'true'
 end

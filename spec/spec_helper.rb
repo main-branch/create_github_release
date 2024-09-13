@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'debug'
+require 'rbconfig'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -14,112 +14,31 @@ RSpec.configure do |config|
   end
 end
 
-# Setup simplecov
+def env_true?(key) = %w[true yes on 1].include? ENV.fetch(key, 'false').downcase
+def cruby? = (RUBY_ENGINE == 'ruby')
+def linux? = RUBY_PLATFORM.include?('linux')
+def macos? = RUBY_PLATFORM.include?('darwin')
+def ci_build? = ENV.fetch('GITHUB_ACTIONS', 'false') == 'true'
 
-require 'simplecov'
-require 'simplecov-lcov'
-
-SimpleCov.formatters = [SimpleCov::Formatter::HTMLFormatter, SimpleCov::Formatter::LcovFormatter]
-
-# Return `true` if the environment variable is set to a truthy value
-#
-# @example
-#   env_true?('COV_SHOW_UNCOVERED')
-#
-# @param name [String] the name of the environment variable
-# @return [Boolean]
-#
-def env_true?(name)
-  value = ENV.fetch(name, '').downcase
-  %w[yes on true 1].include?(value)
+def check_coverage?
+  env_true?('COV_CHECK') || (cruby? && (linux? || macos?))
 end
 
-# Return `true` if the environment variable is NOT set to a truthy value
-#
-# @example
-#   env_false?('COV_NO_FAIL')
-#
-# @param name [String] the name of the environment variable
-# @return [Boolean]
-#
-def env_false?(name)
-  !env_true?(name)
-end
+if check_coverage?
+  # Code specific to MRI Ruby on macOS or Linux
+  require 'simplecov'
+  require 'simplecov-rspec'
+  require 'simplecov-lcov'
 
-# Return `true` if the the test run should fail if the coverage is below the threshold
-#
-# @return [Boolean]
-#
-def fail_on_low_coverage?
-  !(RSpec.configuration.dry_run? || env_true?('COV_NO_FAIL'))
-end
-
-# Return `true` if the the test run should show the lines not covered by tests
-#
-# @return [Boolean]
-#
-def show_lines_not_covered?
-  env_true?('COV_SHOW_UNCOVERED')
-end
-
-# Report if the test coverage was below the configured threshold
-#
-# The threshold is configured by setting the `test_coverage_threshold` variable
-# in this file.
-#
-# Example:
-#
-# ```Ruby
-# test_coverage_threshold = 100
-# ```
-#
-# Coverage below the threshold will cause the rspec run to fail unless the
-# `COV_NO_FAIL` environment variable is set to TRUE.
-#
-# ```Shell
-# COV_NO_FAIL=TRUE rspec
-# ```
-#
-# Example of running the tests in an infinite loop writing failures to `fail.txt`:
-#
-# ```Shell
-# while true; do COV_NO_FAIL=TRUE rspec >> fail.txt; done
-# ````
-#
-# The lines missing coverage will be displayed if the `COV_SHOW_UNCOVERED`
-# environment variable is set to TRUE.
-#
-# ```Shell
-# COV_SHOW_UNCOVERED=TRUE rspec
-# ```
-#
-test_coverage_threshold = 100
-
-SimpleCov.at_exit do
-  SimpleCov.result.format!
-  # rubocop:disable Style/StderrPuts
-  if SimpleCov.result.covered_percent < test_coverage_threshold
-    $stderr.puts
-    $stderr.print 'FAIL: ' if fail_on_low_coverage?
-    $stderr.puts "RSpec Test coverage fell below #{test_coverage_threshold}%"
-
-    if show_lines_not_covered?
-      $stderr.puts "\nThe following lines were not covered by tests:\n"
-      SimpleCov.result.files.each do |source_file| # SimpleCov::SourceFile
-        source_file.missed_lines.each do |line| # SimpleCov::SourceFile::Line
-          $stderr.puts "  .#{source_file.project_filename}:#{line.number}"
-        end
-      end
-    end
-
-    $stderr.puts
-
-    exit 1 if fail_on_low_coverage?
+  if ci_build?
+    SimpleCov.formatters = [
+      SimpleCov::Formatter::HTMLFormatter,
+      SimpleCov::Formatter::LcovFormatter
+    ]
   end
-  # rubocop:enable Style/StderrPuts
-end
 
-SimpleCov.start
+  SimpleCov::RSpec.start(list_uncovered_lines: ci_build?)
+end
 
 # Helper class and method for mocking backtick calls
 
@@ -144,8 +63,31 @@ def execute_mocked_command(mocked_commands, command)
   end
   raise "Command '#{command}' was not mocked" unless mocked_command
 
-  `exit #{mocked_command.exitstatus}`
+  mock_exit_status(mocked_command)
+
   mocked_command.stdout
+end
+
+# Sets $CHILD_STATUS (aka $?) to mock the exit status of a subprocess
+#
+# @return [Void]
+#
+def mock_exit_status(mocked_command)
+  if RUBY_ENGINE == 'truffleruby'
+    # In TruffleRuby backticks do not invoke a shell unless necessary, and therefore
+    # cannot find shell built-ins like 'exit', leading to an Errno::ENOENT error.
+    #
+    # Spawning a new Ruby process to exit works around this issue and is compatible
+    # with all Ruby implementations and platforms.
+    #
+    # However, only do this for TruffleRuby, as spawning a new process is much slower
+    # than `exit` and is not necessary for other Ruby implementations.
+    #
+    pid = Process.spawn(RbConfig.ruby, '-e', "exit #{mocked_command.exitstatus}")
+    Process.wait(pid)
+  else
+    `exit #{mocked_command.exitstatus}`
+  end
 end
 
 # rubocop:disable Metrics/MethodLength

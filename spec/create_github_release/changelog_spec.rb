@@ -21,8 +21,8 @@ RSpec.describe CreateGithubRelease::Changelog do
     it do
       is_expected.to(
         have_attributes(
-          existing_changelog: existing_changelog,
-          next_release_description: next_release_description
+          existing_changelog:,
+          next_release_description:
         )
       )
     end
