@@ -23,7 +23,7 @@ RSpec.describe CreateGithubRelease::Assertions::InGitRepo do
 
     let(:mocked_commands) do
       [
-        MockedCommand.new('git rev-parse --is-inside-work-tree --quiet > /dev/null 2>&1', exitstatus: exitstatus)
+        MockedCommand.new('git rev-parse --is-inside-work-tree --quiet > /dev/null 2>&1', exitstatus:)
       ]
     end
 

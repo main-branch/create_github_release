@@ -3,7 +3,11 @@
 # The default task
 
 desc 'Run the same tasks that the CI build will run'
-task default: %w[spec rubocop yard yard:audit yard:coverage bundle:audit build]
+if RUBY_PLATFORM == 'java'
+  task default: %w[spec rubocop bundle:audit build]
+else
+  task default: %w[spec rubocop yard bundle:audit build]
+end
 
 # Bundler Audit
 
@@ -30,6 +34,11 @@ CLOBBER << 'Gemfile.lock'
 
 require 'rspec/core/rake_task'
 
+if RUBY_PLATFORM == 'java'
+  ENV['JAVA_OPTS'] = '-Djdk.io.File.enableADS=true'
+  ENV['JRUBY_OPTS'] = '--debug'
+end
+
 RSpec::Core::RakeTask.new
 
 CLEAN << 'coverage'
@@ -49,38 +58,40 @@ end
 
 CLEAN << 'rubocop-report.json'
 
-# YARD
+unless RUBY_PLATFORM == 'java'
+  # yard:build
 
-require 'yard'
-YARD::Rake::YardocTask.new do |t|
-  t.files = %w[lib/**/*.rb examples/**/*]
-  t.stats_options = ['--list-undoc']
+  require 'yard'
+
+  YARD::Rake::YardocTask.new('yard:build') do |t|
+    t.files = %w[lib/**/*.rb examples/**/*]
+    t.options = %w[--no-private]
+    t.stats_options = %w[--list-undoc]
+  end
+
+  CLEAN << '.yardoc'
+  CLEAN << 'doc'
+
+  # yard:audit
+
+  desc 'Run yardstick to show missing YARD doc elements'
+  task :'yard:audit' do
+    sh "yardstick 'lib/**/*.rb'"
+  end
+
+  # yard:coverage
+
+  require 'yardstick/rake/verify'
+
+  Yardstick::Rake::Verify.new(:'yard:coverage') do |verify|
+    verify.threshold = 100
+  end
+
+  # yard
+
+  desc 'Run all YARD tasks'
+  task yard: %i[yard:build yard:audit yard:coverage]
 end
-
-CLEAN << '.yardoc'
-CLEAN << 'doc'
-
-# Yardstick
-
-desc 'Run yardstick to show missing YARD doc elements'
-task :'yard:audit' do
-  sh "yardstick 'lib/**/*.rb'"
-end
-
-# Yardstick coverage
-
-require 'yardstick/rake/verify'
-
-Yardstick::Rake::Verify.new(:'yard:coverage') do |verify|
-  verify.threshold = 100
-end
-
-# # Solargraph typecheck
-
-# desc 'Run the solargraph type checker'
-# task :'solargraph:typecheck' do
-#   sh 'bundle exec solargraph typecheck --level=typed'
-# end
 
 # Additional cleanup
 

@@ -32,12 +32,12 @@ RSpec.describe CreateGithubRelease::Assertions::LocalAndRemoteOnSameCommit do
         MockedCommand.new(
           'git rev-parse HEAD',
           stdout: "#{local_commit}\n",
-          exitstatus: exitstatus
+          exitstatus:
         ),
         MockedCommand.new(
           "git ls-remote 'origin' 'default-branch' | cut -f 1",
           stdout: "#{remote_commit}\n",
-          exitstatus: exitstatus
+          exitstatus:
         )
       ]
     end

@@ -47,8 +47,10 @@ RSpec.describe CreateGithubRelease::BacktickDebug do
         end
       end
 
+      require 'rbconfig'
+
       context 'when the command fails' do
-        let(:command) { 'echo foo; exit 1' }
+        let(:command) { "#{RbConfig.ruby} -e \"puts 'foo'; exit 1\"" }
 
         let(:including_class) do
           Class.new do
@@ -61,7 +63,7 @@ RSpec.describe CreateGithubRelease::BacktickDebug do
 
         let(:expected_output) { <<~EXPECTED_OUTPUT }
           COMMAND
-            echo foo; exit 1
+            #{command}
           OUTPUT
             foo
           EXITSTATUS
