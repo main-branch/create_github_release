@@ -6,6 +6,7 @@
 [![Build Status](https://github.com/main-branch/create_github_release/actions/workflows/continuous_integration.yml/badge.svg)](https://github.com/main-branch/create_github_release/actions/workflows/continuous_integration.yml)
 [![Maintainability](https://api.codeclimate.com/v1/badges/b8c0af10b15a0ffeb1a1/maintainability)](https://codeclimate.com/github/main-branch/create_github_release/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/b8c0af10b15a0ffeb1a1/test_coverage)](https://codeclimate.com/github/main-branch/create_github_release/test_coverage)
+[![Slack](https://img.shields.io/badge/slack-main--branch/create__github__release-yellow.svg?logo=slack)](https://main-branch.slack.com/archives/C07NG282N80)
 
 When run in your gem's git worktree, the `create-github-release` script does the
 following:
