@@ -13,16 +13,17 @@ Gem::Specification.new do |spec|
     A script that manages your gem version and creates a GitHub branch, PR, and
     release for a new gem version.
   DESCRIPTION
-  spec.homepage = 'https://github.com/main-branch/create_github_release'
   spec.license = 'MIT'
   spec.required_ruby_version = '>= 3.1.0'
 
   spec.metadata['allowed_push_host'] = 'https://rubygems.org'
 
+  # Project links
+  spec.homepage = "https://github.com/main-branch/#{spec.name}"
   spec.metadata['homepage_uri'] = spec.homepage
   spec.metadata['source_code_uri'] = spec.homepage
-  spec.metadata['changelog_uri'] = "https://rubydoc.info/gems/#{spec.name}/#{spec.version}/file/CHANGELOG.md"
   spec.metadata['documentation_uri'] = "https://rubydoc.info/gems/#{spec.name}/#{spec.version}"
+  spec.metadata['changelog_uri'] = "https://rubydoc.info/gems/#{spec.name}/#{spec.version}/file/CHANGELOG.md"
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
