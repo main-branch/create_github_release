@@ -1,9 +1,11 @@
 # The create_github_release Gem
 
 [![Gem Version](https://badge.fury.io/rb/create_github_release.svg)](https://badge.fury.io/rb/create_github_release)
- [![Build Status](https://github.com/main-branch/create_github_release/workflows/Ruby/badge.svg?branch=main)](https://github.com/main-branch/create_github_release/actions?query=workflow%3ARuby)
- [![Maintainability](https://api.codeclimate.com/v1/badges/b8c0af10b15a0ffeb1a1/maintainability)](https://codeclimate.com/github/main-branch/create_github_release/maintainability)
- [![Test Coverage](https://api.codeclimate.com/v1/badges/b8c0af10b15a0ffeb1a1/test_coverage)](https://codeclimate.com/github/main-branch/create_github_release/test_coverage)
+[![Documentation](https://img.shields.io/badge/Documentation-Latest-green)](https://rubydoc.info/gems/create_github_release/)
+[![Change Log](https://img.shields.io/badge/CHANGELOG-Latest-green)](https://rubydoc.info/gems/create_github_release/file/CHANGELOG.md)
+[![Build Status](https://github.com/main-branch/create_github_release/actions/workflows/continuous_integration.yml/badge.svg)](https://github.com/main-branch/create_github_release/actions/workflows/continuous_integration.yml)
+[![Maintainability](https://api.codeclimate.com/v1/badges/b8c0af10b15a0ffeb1a1/maintainability)](https://codeclimate.com/github/main-branch/create_github_release/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/b8c0af10b15a0ffeb1a1/test_coverage)](https://codeclimate.com/github/main-branch/create_github_release/test_coverage)
 
 When run in your gem's git worktree, the `create-github-release` script does the
 following:
