@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v2.0.0 (2024-09-18)
+
+[Full Changelog](https://github.com/main-branch/create_github_release/compare/v1.5.0..v2.0.0)
+
+Changes since v1.5.0:
+
+* 639dc5c Use the command_line_boss gem for CLI parsing
+* 81b10ac Use shared Rubocop config
+* 7f2576a Update copyright notice in this project
+* 29c7b6e Update links in gemspec
+* 610f216 Add Slack badge for this project in README
+* 2fb5005 Use standard badges at the top of the README
+* 9386029 Update yardopts with new standard options
+* 35af127 Standardize YARD and Markdown Lint configurations
+* 5b0cc7b Set JRuby —debug option when running tests in GitHub Actions workflows
+* ec2a239 Update continuous integration and experimental ruby builds
+* f4d0e93 Depend on v1 of semver_pr_label_check
+
 ## v1.5.0 (2024-09-10)
 
 [Full Changelog](https://github.com/main-branch/create_github_release/compare/v1.4.0..v1.5.0)
