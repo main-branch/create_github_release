@@ -43,7 +43,9 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'version_boss', '~> 0.1'
 
   spec.add_development_dependency 'bundler-audit', '~> 0.9'
+  spec.add_development_dependency 'command_line_boss', '~> 0.1'
   # spec.add_development_dependency 'debug', '~> 1.9'
+  spec.add_development_dependency 'logger', '~> 1.6'
   spec.add_development_dependency 'main_branch_shared_rubocop_config', '~> 0.1'
   spec.add_development_dependency 'rake', '~> 13.2'
   spec.add_development_dependency 'rspec', '~> 3.13'

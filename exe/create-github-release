@@ -25,7 +25,7 @@ def wait_for_non_nil(method, max_attempts: 10, sleep_time: 0.5)
   result
 end
 
-options = CreateGithubRelease::CommandLine::Parser.new.parse(*ARGV)
+options = CreateGithubRelease::CommandLine::Parser.new.parse!(ARGV).options
 pp options if options.verbose
 
 project = CreateGithubRelease::Project.new(options)

@@ -11,7 +11,7 @@ RSpec.describe CreateGithubRelease::CommandLine::Parser do
   end
 
   describe '#parse' do
-    subject { parser.parse(*args) }
+    subject { parser.parse!(args).options }
 
     context 'when a release type is not given' do
       let(:args) { [] }
@@ -252,7 +252,7 @@ RSpec.describe CreateGithubRelease::CommandLine::Parser do
       context 'when too many args are given' do
         let(:args) { %w[major minor] }
         it 'should exit' do
-          expect { subject }.to raise_error(SystemExit).and output(/^ERROR: Too many args/).to_stderr
+          expect { subject }.to raise_error(SystemExit).and output(/^ERROR: Unexpected arguments: minor/).to_stderr
         end
       end
 
