@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v2.0.1 (2024-09-18)
+
+[Full Changelog](https://github.com/main-branch/create_github_release/compare/v2.0.0..v2.0.1)
+
+Changes since v2.0.0:
+
+* 0b28bdc Make command_line_boss a runtime dependency
+
 ## v2.0.0 (2024-09-18)
 
 [Full Changelog](https://github.com/main-branch/create_github_release/compare/v1.5.0..v2.0.0)
