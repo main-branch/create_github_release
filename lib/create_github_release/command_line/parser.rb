@@ -1,14 +1,12 @@
 # frozen_string_literal: true
 
 require 'English'
-require 'optparse'
+require 'command_line_boss'
 require 'create_github_release/command_line/options'
 require 'create_github_release/version'
 
 module CreateGithubRelease
   module CommandLine
-    # rubocop:disable Metrics/ClassLength
-
     # Parses the options for this script
     #
     # @example Specify the release type
@@ -30,43 +28,8 @@ module CreateGithubRelease
     #
     # @api public
     #
-    class Parser
-      # Create a new command line parser
-      #
-      # @example
-      #   parser = CommandLineParser.new
-      #
-      def initialize
-        @option_parser = OptionParser.new
-        define_options
-        @options = CreateGithubRelease::CommandLine::Options.new
-      end
-
-      # Parse the command line arguements returning the options
-      #
-      # @example
-      #   parser = CommandLineParser.new
-      #   options = parser.parse(['major'])
-      #
-      # @param args [Array<String>] the command line arguments
-      #
-      # @return [CreateGithubRelease::CommandLine::Options] the options
-      #
-      def parse(*args)
-        begin
-          option_parser.parse!(remaining_args = args.dup)
-        rescue OptionParser::InvalidOption, OptionParser::MissingArgument => e
-          report_errors(e.message)
-        end
-        parse_remaining_args(remaining_args)
-        # puts options unless options.quiet
-        report_errors(*options.errors) unless options.valid?
-        options
-      end
-
-      private
-
-      # @!attribute [rw] options
+    class Parser < CommandLineBoss
+      # @!attribute [r] options
       #
       # The options to used for the create-github-release script
       #
@@ -82,45 +45,26 @@ module CreateGithubRelease
       #
       attr_reader :options
 
-      # @!attribute [rw] option_parser
-      #
-      # The option parser
-      #
-      # @return [OptionParser] the option parser
-      #
+      private
+
+      # Set the default options
+      # @return [Void]
       # @api private
-      #
-      attr_reader :option_parser
+      def set_defaults
+        @options = CreateGithubRelease::CommandLine::Options.new
+      end
 
       # Parse non-option arguments (the release type)
       # @return [void]
       # @api private
-      def parse_remaining_args(remaining_args)
-        options.release_type = remaining_args.shift || nil
-        report_errors('Too many args') unless remaining_args.empty?
-      end
-
-      # An error message constructed from the given errors array
-      # @return [String]
-      # @api private
-      def error_message(errors)
-        <<~MESSAGE
-          #{errors.map { |e| "ERROR: #{e}" }.join("\n")}
-
-          Use --help for usage
-        MESSAGE
-      end
-
-      # Output an error message and useage to stderr and exit
-      # @return [void]
-      # @api private
-      def report_errors(*errors)
-        warn error_message(errors)
-        exit 1
+      def parse_arguments
+        options.release_type = args.shift
       end
 
       # The banner for the option parser
-      BANNER = <<~BANNER.freeze
+      # @return [String] the banner
+      # @api private
+      def banner = <<~BANNER.freeze
         Usage:
         #{File.basename($PROGRAM_NAME)} --help | RELEASE_TYPE [options]
 
@@ -131,25 +75,11 @@ module CreateGithubRelease
         Options:
       BANNER
 
-      # Define the options for OptionParser
-      # @return [void]
-      # @api private
-      def define_options
-        # @sg-ignore
-        option_parser.banner = BANNER
-        %i[
-          define_help_option define_default_branch_option define_release_branch_option define_pre_option
-          define_pre_type_option define_remote_option define_last_release_version_option define_version_option
-          define_next_release_version_option define_release_pr_label_option define_changelog_path_option
-          define_quiet_option define_verbose_option
-        ].each { |m| send(m) }
-      end
-
       # Define the release_pr_label option which requires a value
       # @return [void]
       # @api private
       def define_release_pr_label_option
-        option_parser.on('--release-pr-label=LABEL', 'The label to apply to the release pull request') do |label|
+        parser.on('--release-pr-label=LABEL', 'The label to apply to the release pull request') do |label|
           options.release_pr_label = label
         end
       end
@@ -158,7 +88,7 @@ module CreateGithubRelease
       # @return [void]
       # @api private
       def define_pre_option
-        option_parser.on('-p', '--pre', 'Create a pre-release') do |pre|
+        parser.on('-p', '--pre', 'Create a pre-release') do |pre|
           options.pre = pre
         end
       end
@@ -168,7 +98,7 @@ module CreateGithubRelease
       # @api private
       def define_pre_type_option
         description = 'Type of pre-release to create (e.g. alpha, beta, etc.)'
-        option_parser.on('-t', '--pre-type=TYPE', description) do |pre_type|
+        parser.on('-t', '--pre-type=TYPE', description) do |pre_type|
           options.pre_type = pre_type
         end
       end
@@ -177,7 +107,7 @@ module CreateGithubRelease
       # @return [void]
       # @api private
       def define_quiet_option
-        option_parser.on('-q', '--[no-]quiet', 'Do not show output') do |quiet|
+        parser.on('-q', '--[no-]quiet', 'Do not show output') do |quiet|
           options.quiet = quiet
         end
       end
@@ -186,7 +116,7 @@ module CreateGithubRelease
       # @return [void]
       # @api private
       def define_verbose_option
-        option_parser.on('-V', '--[no-]verbose', 'Show extra output') do |verbose|
+        parser.on('-V', '--[no-]verbose', 'Show extra output') do |verbose|
           options.verbose = verbose
         end
       end
@@ -195,8 +125,8 @@ module CreateGithubRelease
       # @return [void]
       # @api private
       def define_help_option
-        option_parser.on_tail('-h', '--help', 'Show this message') do
-          puts option_parser
+        parser.on_tail('-h', '--help', 'Show this message') do
+          puts parser
           exit 0
         end
       end
@@ -205,7 +135,7 @@ module CreateGithubRelease
       # @return [void]
       # @api private
       def define_default_branch_option
-        option_parser.on('--default-branch=BRANCH_NAME', 'Override the default branch') do |name|
+        parser.on('--default-branch=BRANCH_NAME', 'Override the default branch') do |name|
           options.default_branch = name
         end
       end
@@ -214,7 +144,7 @@ module CreateGithubRelease
       # @return [void]
       # @api private
       def define_release_branch_option
-        option_parser.on('--release-branch=BRANCH_NAME', 'Override the release branch to create') do |name|
+        parser.on('--release-branch=BRANCH_NAME', 'Override the release branch to create') do |name|
           options.release_branch = name
         end
       end
@@ -223,7 +153,7 @@ module CreateGithubRelease
       # @return [void]
       # @api private
       def define_remote_option
-        option_parser.on('--remote=REMOTE_NAME', "Use this remote name instead of 'origin'") do |name|
+        parser.on('--remote=REMOTE_NAME', "Use this remote name instead of 'origin'") do |name|
           options.remote = name
         end
       end
@@ -232,8 +162,10 @@ module CreateGithubRelease
       # @return [void]
       # @api private
       def define_last_release_version_option
-        option_parser.on('--last-release-version=VERSION',
-                         'Use this version instead `gem-version-boss current`') do |version|
+        parser.on(
+          '--last-release-version=VERSION',
+          'Use this version instead `gem-version-boss current`'
+        ) do |version|
           options.last_release_version = version
         end
       end
@@ -242,7 +174,7 @@ module CreateGithubRelease
       # @return [void]
       # @api private
       def define_next_release_version_option
-        option_parser.on(
+        parser.on(
           '--next-release-version=VERSION',
           'Use this version instead `gem-version-boss next-RELEASE_TYPE`'
         ) do |version|
@@ -254,7 +186,7 @@ module CreateGithubRelease
       # @return [void]
       # @api private
       def define_changelog_path_option
-        option_parser.on('--changelog-path=PATH', 'Use this file instead of CHANGELOG.md') do |name|
+        parser.on('--changelog-path=PATH', 'Use this file instead of CHANGELOG.md') do |name|
           options.changelog_path = name
         end
       end
@@ -263,12 +195,19 @@ module CreateGithubRelease
       # @return [void]
       # @api private
       def define_version_option
-        option_parser.on_tail('-v', '--version', 'Output the version of this script') do
+        parser.on_tail('-v', '--version', 'Output the version of this script') do
           puts CreateGithubRelease::VERSION
           exit 0
         end
       end
+
+      # Validate the options once they have been parsed
+      # @return [Void]
+      # @raise [SystemExit] if the options are invalid
+      # @api private
+      def validate_options
+        options.errors.each { |error_message| add_error_message(error_message) }
+      end
     end
-    # rubocop:enable Metrics/ClassLength
   end
 end
