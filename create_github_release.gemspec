@@ -40,10 +40,11 @@ Gem::Specification.new do |spec|
     'Ruby: MRI 3.1 or later, TruffleRuby 24 or later, or JRuby 9.4 or later'
   ]
 
-  spec.add_dependency 'command_line_boss', '~> 0.1'
-  spec.add_dependency 'version_boss', '~> 0.1'
+  spec.add_dependency 'command_line_boss', '~> 0.2'
+  spec.add_dependency 'version_boss', '~> 0.2'
 
   spec.add_development_dependency 'bundler-audit', '~> 0.9'
+  spec.add_development_dependency 'create_github_release', '~> 2.1'
   # spec.add_development_dependency 'debug', '~> 1.9'
   spec.add_development_dependency 'logger', '~> 1.6'
   spec.add_development_dependency 'main_branch_shared_rubocop_config', '~> 0.1'
