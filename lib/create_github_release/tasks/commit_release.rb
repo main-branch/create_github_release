@@ -31,7 +31,7 @@ module CreateGithubRelease
       #
       def run
         print 'Making release commit...'
-        `git commit -s -m 'Release #{project.next_release_tag}'`
+        `git commit -s -m 'chore: Release #{project.next_release_tag}'`
         if $CHILD_STATUS.success?
           puts 'OK'
         else

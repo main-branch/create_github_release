@@ -28,7 +28,7 @@ RSpec.describe CreateGithubRelease::Tasks::CommitRelease do
 
     let(:mocked_commands) do
       [
-        MockedCommand.new("git commit -s -m 'Release #{next_release_tag}'", exitstatus: git_exitstatus)
+        MockedCommand.new("git commit -s -m 'chore: Release #{next_release_tag}'", exitstatus: git_exitstatus)
       ]
     end
 
