@@ -6,6 +6,8 @@
 [![Build Status](https://github.com/main-branch/create_github_release/actions/workflows/continuous_integration.yml/badge.svg)](https://github.com/main-branch/create_github_release/actions/workflows/continuous_integration.yml)
 [![Maintainability](https://api.codeclimate.com/v1/badges/b8c0af10b15a0ffeb1a1/maintainability)](https://codeclimate.com/github/main-branch/create_github_release/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/b8c0af10b15a0ffeb1a1/test_coverage)](https://codeclimate.com/github/main-branch/create_github_release/test_coverage)
+[![Conventional
+Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 [![Slack](https://img.shields.io/badge/slack-main--branch/create__github__release-yellow.svg?logo=slack)](https://main-branch.slack.com/archives/C07NG282N80)
 
 When run in your gem's git worktree, the `create-github-release` script does the
@@ -40,6 +42,8 @@ Tested on Ruby 3.0+
   * [How is the changelog updated?](#how-is-the-changelog-updated)
 * [Development](#development)
 * [Contributing](#contributing)
+  * [Commit message guidelines](#commit-message-guidelines)
+  * [Pull request guidelines](#pull-request-guidelines)
 * [License](#license)
 
 ## Installation
@@ -400,6 +404,31 @@ To install this gem onto your current Ruby environment, run `bundle exec rake in
 
 Bug reports and pull requests are welcome on
 [this project's GitHub page](https://github.com/main-branch/create_github_release)
+
+### Commit message guidelines
+
+All commit messages must follow the [Conventional Commits
+standard](https://www.conventionalcommits.org/en/v1.0.0/). This helps us maintain a
+clear and structured commit history, automate versioning, and generate changelogs
+effectively.
+
+To ensure compliance, this project includes:
+
+* A git commit-msg hook that validates your commit messages before they are accepted.
+
+  To activate the hook, you must have node installed and run `npm install`.
+
+* A GitHub Actions workflow that will enforce the Conventional Commit standard as
+  part of the continuous integration pipeline.
+
+  Any commit message that does not conform to the Conventional Commits standard will
+  cause the workflow to fail and not allow the PR to be merged.
+
+### Pull request guidelines
+
+All pull requests must be merged using rebase merges. This ensures that commit
+messages from the feature branch are preserved in the release branch, keeping the
+history clean and meaningful.
 
 ## License
 
