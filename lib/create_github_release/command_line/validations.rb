@@ -119,7 +119,7 @@ module CreateGithubRelease
         # @return [Boolean]
         # @api private
         def valid?
-          options.quiet == true || options.quiet == false
+          [true, false].include? options.quiet
         end
 
         # Called when valid? is `false` to return the error messages
@@ -137,7 +137,7 @@ module CreateGithubRelease
         # @return [Boolean]
         # @api private
         def valid?
-          options.verbose == true || options.verbose == false
+          [true, false].include? options.verbose
         end
 
         # Called when valid? is `false` to return the error messages
