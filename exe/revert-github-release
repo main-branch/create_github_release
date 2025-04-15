@@ -76,7 +76,7 @@ class Parser
     COMMAND
   end
 
-  BANNER = <<~BANNER.freeze
+  private_constant BANNER = <<~BANNER.freeze
     Usage:
     #{File.basename($PROGRAM_NAME)} [--help | --version]
 
