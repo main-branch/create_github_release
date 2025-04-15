@@ -76,7 +76,7 @@ class Parser
     COMMAND
   end
 
-  private_constant BANNER = <<~BANNER.freeze
+  BANNER = <<~BANNER.freeze
     Usage:
     #{File.basename($PROGRAM_NAME)} [--help | --version]
 
@@ -96,6 +96,7 @@ class Parser
 
     Options:
   BANNER
+  private_constant :BANNER
 
   # Define the options for OptionParser
   # @return [void]
