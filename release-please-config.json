@@ -1,0 +1,22 @@
+{
+  "bootstrap-sha": "5f3a18d74fb755d31cc4d3dfc9d18a6df4799945",
+  "packages": {
+    ".": {
+      "release-type": "ruby",
+      "package-name": "create_github_release",
+      "changelog-path": "CHANGELOG.md",
+      "version-file": "lib/create_github_release/version.rb",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true,
+      "draft": false,
+      "prerelease": false,
+      "include-component-in-tag": false
+    }
+  },
+  "plugins": [
+    {
+      "type": "sentence-case"
+    }
+  ],
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
+}
