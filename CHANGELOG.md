@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.6](https://github.com/main-branch/create_github_release/compare/v2.1.5...v2.1.6) (2026-04-24)
+
+
+### Other Changes
+
+* **dependencies:** Update dependencies for all GitHub Actions workflows ([8acc8f4](https://github.com/main-branch/create_github_release/commit/8acc8f4baa6be0bffad6cd09d1370076ee7c0f68))
+* **rubocop:** Fix rubocop offenses from new cops ([9d22002](https://github.com/main-branch/create_github_release/commit/9d2200280b9249abce81c1c4d7f8efe0aa5fc92f))
+
 ## [2.1.5](https://github.com/main-branch/create_github_release/compare/v2.1.4...v2.1.5) (2025-04-18)
 
 
