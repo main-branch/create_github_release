@@ -108,7 +108,7 @@ module CreateGithubRelease
     def front_matter
       return '' if front_matter_start == front_matter_end
 
-      lines[front_matter_start..front_matter_end - 1].join("\n")
+      lines[front_matter_start..(front_matter_end - 1)].join("\n")
     end
 
     # The body of the existing changelog
@@ -168,7 +168,7 @@ module CreateGithubRelease
     def body
       return '' if body_start == body_end
 
-      lines[body_start..body_end - 1].join("\n")
+      lines[body_start..(body_end - 1)].join("\n")
     end
 
     # The changelog before the new release is added
