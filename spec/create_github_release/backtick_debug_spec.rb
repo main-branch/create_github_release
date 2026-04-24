@@ -9,6 +9,7 @@ RSpec.describe CreateGithubRelease::BacktickDebug do
       let(:including_class) do
         Class.new do
           include CreateGithubRelease::BacktickDebug
+
           def backtick_debug?
             false
           end
@@ -27,6 +28,7 @@ RSpec.describe CreateGithubRelease::BacktickDebug do
         let(:including_class) do
           Class.new do
             include CreateGithubRelease::BacktickDebug
+
             def backtick_debug?
               true
             end
@@ -55,6 +57,7 @@ RSpec.describe CreateGithubRelease::BacktickDebug do
         let(:including_class) do
           Class.new do
             include CreateGithubRelease::BacktickDebug
+
             def backtick_debug?
               true
             end

@@ -139,6 +139,7 @@ module CreateGithubRelease
       end
 
       extend Forwardable
+
       def_delegators :@validator, :valid?, :errors
 
       private

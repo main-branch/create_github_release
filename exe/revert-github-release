@@ -24,7 +24,7 @@ class Options
 end
 
 # Parse the command line options for this script
-class Parser
+class Parser # rubocop:disable Style/OneClassPerFile
   # Create a new command line parser
   #
   # @example
